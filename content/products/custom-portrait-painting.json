@@ -1,0 +1,9 @@
+{
+  "name": "Custom Portrait Painting",
+  "slug": "custom-portrait-painting",
+  "category": "paintings",
+  "description": "Commission a stunning custom portrait painting from your favorite photos. Hand-painted with love and attention to detail.",
+  "mainImage": "/uploads/placeholder.svg",
+  "images": [],
+  "active": true
+}

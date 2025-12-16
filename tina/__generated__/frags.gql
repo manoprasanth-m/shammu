@@ -1,0 +1,19 @@
+fragment CategoriesParts on Categories {
+  __typename
+  title
+  slug
+}
+
+fragment ProductsParts on Products {
+  __typename
+  name
+  slug
+  category
+  description
+  mainImage
+  images {
+    __typename
+    src
+  }
+  active
+}
