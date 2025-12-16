@@ -1,0 +1,113 @@
+Build a production-ready website Mal’s Mandi (e-commerce style but NO ordering / NO cart / NO checkout) using:
+Next.js (TypeScript) with Pages Router and Static Generation (SSG) for home/category/product pages.
+TinaCMS for an editor-friendly CMS at /admin.
+Storage must be file-based (Git-backed): products & categories stored as JSON/MD files in the repo (no database).
+Deploy target: Vercel (static + Next pages). Ensure it works on Vercel.
+Make the site modern, theme (White, Black, magenta, etc)
+Functional requirements
+Public site
+Home page /:
+Hero section (minimal).
+List of categories.
+“All products” grid with category filter (client-side filter is fine).
+Category page /category/[slug]:
+Show the category title and product list for that category.
+Product page /product/[slug]:
+Show Main Image
+Show Other images gallery
+Show Product Name
+Show Category
+Show Description (optional)
+Prominent CTA button: “Enquire on WhatsApp” with pre-filled message containing product name + product URL.
+WhatsApp CTAs
+Global “General enquiry” CTA available in header/footer.
+Product page CTA sends:
+Hi! I'm interested in: <Product Name>. Link: <Product URL>
+WhatsApp number must be configurable via env var:
+NEXT_PUBLIC_WHATSAPP_NUMBER (international format, digits only, no +)
+Owner CMS
+Route: /admin
+CMS must support:
+Add/edit/delete categories
+Add/edit/delete products
+Product fields in CMS:
+Main Image (required)
+Other Images (0..n)
+Product Name (required)
+Category (select from category list; allow creating new category via categories collection)
+Description (optional)
+Slugs:
+Category slug derived from filename
+Product slug derived from filename
+Keep stable URLs: /category/<slug> and /product/<slug>
+Design / Theme
+Primary: white
+Secondary: black
+Accent: pink
+Clean minimal UI. Use Tailwind with CSS variables.
+Components: Header, Footer, Category chips, Product card, Image gallery.
+	5. Site category list 
+Customized Gifts: Personalized Gifts, Gift Sets
+Apparel: Tops, Outerwear
+Bags: Tote Bags, Backpacks
+Jewelry: Necklaces, Bracelets
+Paintings: Custom Portraits, Original Paintings
+Art Prints: Posters, Framed Prints
+Wall Decor: Signs & Plaques, Wall Clocks
+Home Decor: Candles & Diffusers, Decorative Accents
+Home Furnishings: Bedding, Curtains
+Kitchen & Dining: Drinkware, Cutting Boards
+Stationery & Office: Invitations, Notebooks & Planners
+Kids & Baby: Baby Essentials, Nursery Decor
+Events & Parties: Weddings, Birthdays
+Custom Requests: Bespoke Builds, Modifications
+Seasonal Decor: Ornaments, Wreaths
+Data + file structure (must implement)
+content/categories/<slug>.json
+{ "title": "Shoes", "slug": "shoes" }
+content/products/<slug>.json
+Example:
+{
+  "name": "Nike Air Max",
+  "slug": "nike-air-max",
+  "category": "shoes",
+  "description": "Optional description",
+  "mainImage": "/uploads/nike-air-max-main.jpg",
+  "images": ["/uploads/nike-air-max-1.jpg", "/uploads/nike-air-max-2.jpg"],
+  "active": true
+}
+
+
+Images must live in public/uploads/ so they deploy cleanly on Vercel. CMS image picker should point to this folder.
+TinaCMS schema (must implement)
+Collection: categories
+fields: title (string, required), slug (string, required)
+Collection: products
+fields:
+name (string, required)
+slug (string, required)
+category (string required; use select options built dynamically from categories collection OR reference field)
+description (string textarea, optional)
+mainImage (image required)
+images (list of images)
+active (boolean default true)
+Make sure adding a new category in CMS makes it available in the product category dropdown.
+Rendering logic (SSG)
+Implement helpers that read JSON files from content/:
+getAllCategories()
+getAllProducts()
+getProductsByCategory(slug)
+getProductBySlug(slug)
+Use getStaticProps + getStaticPaths for:
+/category/[slug]
+/product/[slug]
+Home can be getStaticProps.
+Add graceful fallback pages (404).
+WhatsApp link helper (must implement)
+Create a small utility:
+makeWhatsAppLink({ phone, text }) => https://wa.me/<phone>?text=<encoded>
+Use encodeURIComponent.
+On product page, include product absolute URL; build from NEXT_PUBLIC_SITE_URL (fallback to http://localhost:3000 in dev).
+
+
+
