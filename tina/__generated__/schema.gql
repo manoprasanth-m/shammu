@@ -58,11 +58,14 @@ type Query {
   categoriesConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: CategoriesFilter): CategoriesConnection!
   products(relativePath: String): Products!
   productsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: ProductsFilter): ProductsConnection!
+  fulfilledOrders(relativePath: String): FulfilledOrders!
+  fulfilledOrdersConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: FulfilledOrdersFilter): FulfilledOrdersConnection!
 }
 
 input DocumentFilter {
   categories: CategoriesFilter
   products: ProductsFilter
+  fulfilledOrders: FulfilledOrdersFilter
 }
 
 type DocumentConnectionEdges {
@@ -88,7 +91,7 @@ type Collection {
   documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter, folder: String): DocumentConnection!
 }
 
-union DocumentNode = Categories | Products | Folder
+union DocumentNode = Categories | Products | FulfilledOrders | Folder
 
 type Categories implements Node & Document {
   title: String!
@@ -175,6 +178,30 @@ type ProductsConnection implements Connection {
   edges: [ProductsConnectionEdges]
 }
 
+type FulfilledOrders implements Node & Document {
+  title: String!
+  image: String!
+  id: ID!
+  _sys: SystemInfo!
+  _values: JSON!
+}
+
+input FulfilledOrdersFilter {
+  title: StringFilter
+  image: ImageFilter
+}
+
+type FulfilledOrdersConnectionEdges {
+  cursor: String!
+  node: FulfilledOrders
+}
+
+type FulfilledOrdersConnection implements Connection {
+  pageInfo: PageInfo!
+  totalCount: Float!
+  edges: [FulfilledOrdersConnectionEdges]
+}
+
 type Mutation {
   addPendingDocument(collection: String!, relativePath: String!, template: String): DocumentNode!
   updateDocument(collection: String, relativePath: String!, params: DocumentUpdateMutation!): DocumentNode!
@@ -185,17 +212,21 @@ type Mutation {
   createCategories(relativePath: String!, params: CategoriesMutation!): Categories!
   updateProducts(relativePath: String!, params: ProductsMutation!): Products!
   createProducts(relativePath: String!, params: ProductsMutation!): Products!
+  updateFulfilledOrders(relativePath: String!, params: FulfilledOrdersMutation!): FulfilledOrders!
+  createFulfilledOrders(relativePath: String!, params: FulfilledOrdersMutation!): FulfilledOrders!
 }
 
 input DocumentUpdateMutation {
   categories: CategoriesMutation
   products: ProductsMutation
+  fulfilledOrders: FulfilledOrdersMutation
   relativePath: String
 }
 
 input DocumentMutation {
   categories: CategoriesMutation
   products: ProductsMutation
+  fulfilledOrders: FulfilledOrdersMutation
 }
 
 input CategoriesMutation {
@@ -215,6 +246,11 @@ input ProductsMutation {
   mainImage: String
   images: [ProductsImagesMutation]
   active: Boolean
+}
+
+input FulfilledOrdersMutation {
+  title: String
+  image: String
 }
 
 schema {

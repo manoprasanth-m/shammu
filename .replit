@@ -5,7 +5,7 @@ expertMode = true
 [userenv]
 
 [userenv.shared]
-NEXT_PUBLIC_WHATSAPP_NUMBER = "1234567890"
+NEXT_PUBLIC_WHATSAPP_NUMBER = "+919444637337"
 NEXT_PUBLIC_SITE_URL = "http://localhost:5000"
 
 [nix]

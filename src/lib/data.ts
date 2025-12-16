@@ -16,8 +16,14 @@ export interface Product {
   active: boolean;
 }
 
+export interface FulfilledOrder {
+  title: string;
+  image: string;
+}
+
 const CATEGORIES_DIR = path.join(process.cwd(), 'content/categories');
 const PRODUCTS_DIR = path.join(process.cwd(), 'content/products');
+const FULFILLED_ORDERS_DIR = path.join(process.cwd(), 'content/fulfilled-orders');
 
 export function getAllCategories(): Category[] {
   try {
@@ -99,5 +105,29 @@ export function getProductBySlug(slug: string): Product | null {
   } catch (error) {
     console.error('Error reading product:', error);
     return null;
+  }
+}
+
+export function getAllFulfilledOrders(): FulfilledOrder[] {
+  try {
+    if (!fs.existsSync(FULFILLED_ORDERS_DIR)) {
+      return [];
+    }
+    const files = fs.readdirSync(FULFILLED_ORDERS_DIR);
+    const orders: FulfilledOrder[] = [];
+
+    for (const file of files) {
+      if (file.endsWith('.json')) {
+        const filePath = path.join(FULFILLED_ORDERS_DIR, file);
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(content);
+        orders.push(data);
+      }
+    }
+
+    return orders;
+  } catch (error) {
+    console.error('Error reading fulfilled orders:', error);
+    return [];
   }
 }

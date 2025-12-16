@@ -133,6 +133,34 @@ var config_default = defineConfig({
         defaultItem: () => ({
           active: true
         })
+      },
+      {
+        name: "fulfilledOrders",
+        label: "Fulfilled Orders",
+        path: "content/fulfilled-orders",
+        format: "json",
+        fields: [
+          {
+            type: "string",
+            name: "title",
+            label: "Title",
+            required: true
+          },
+          {
+            type: "image",
+            name: "image",
+            label: "Image",
+            required: true
+          }
+        ],
+        ui: {
+          filename: {
+            readonly: false,
+            slugify: (values) => {
+              return values?.title?.toLowerCase().replace(/ /g, "-") || "";
+            }
+          }
+        }
       }
     ]
   }

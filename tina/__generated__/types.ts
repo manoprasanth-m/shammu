@@ -86,6 +86,8 @@ export type Query = {
   categoriesConnection: CategoriesConnection;
   products: Products;
   productsConnection: ProductsConnection;
+  fulfilledOrders: FulfilledOrders;
+  fulfilledOrdersConnection: FulfilledOrdersConnection;
 };
 
 
@@ -139,9 +141,25 @@ export type QueryProductsConnectionArgs = {
   filter?: InputMaybe<ProductsFilter>;
 };
 
+
+export type QueryFulfilledOrdersArgs = {
+  relativePath?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryFulfilledOrdersConnectionArgs = {
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<FulfilledOrdersFilter>;
+};
+
 export type DocumentFilter = {
   categories?: InputMaybe<CategoriesFilter>;
   products?: InputMaybe<ProductsFilter>;
+  fulfilledOrders?: InputMaybe<FulfilledOrdersFilter>;
 };
 
 export type DocumentConnectionEdges = {
@@ -181,7 +199,7 @@ export type CollectionDocumentsArgs = {
   folder?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type DocumentNode = Categories | Products | Folder;
+export type DocumentNode = Categories | Products | FulfilledOrders | Folder;
 
 export type Categories = Node & Document & {
   __typename?: 'Categories';
@@ -275,6 +293,33 @@ export type ProductsConnection = Connection & {
   edges?: Maybe<Array<Maybe<ProductsConnectionEdges>>>;
 };
 
+export type FulfilledOrders = Node & Document & {
+  __typename?: 'FulfilledOrders';
+  title: Scalars['String']['output'];
+  image: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  _sys: SystemInfo;
+  _values: Scalars['JSON']['output'];
+};
+
+export type FulfilledOrdersFilter = {
+  title?: InputMaybe<StringFilter>;
+  image?: InputMaybe<ImageFilter>;
+};
+
+export type FulfilledOrdersConnectionEdges = {
+  __typename?: 'FulfilledOrdersConnectionEdges';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<FulfilledOrders>;
+};
+
+export type FulfilledOrdersConnection = Connection & {
+  __typename?: 'FulfilledOrdersConnection';
+  pageInfo: PageInfo;
+  totalCount: Scalars['Float']['output'];
+  edges?: Maybe<Array<Maybe<FulfilledOrdersConnectionEdges>>>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   addPendingDocument: DocumentNode;
@@ -286,6 +331,8 @@ export type Mutation = {
   createCategories: Categories;
   updateProducts: Products;
   createProducts: Products;
+  updateFulfilledOrders: FulfilledOrders;
+  createFulfilledOrders: FulfilledOrders;
 };
 
 
@@ -345,15 +392,29 @@ export type MutationCreateProductsArgs = {
   params: ProductsMutation;
 };
 
+
+export type MutationUpdateFulfilledOrdersArgs = {
+  relativePath: Scalars['String']['input'];
+  params: FulfilledOrdersMutation;
+};
+
+
+export type MutationCreateFulfilledOrdersArgs = {
+  relativePath: Scalars['String']['input'];
+  params: FulfilledOrdersMutation;
+};
+
 export type DocumentUpdateMutation = {
   categories?: InputMaybe<CategoriesMutation>;
   products?: InputMaybe<ProductsMutation>;
+  fulfilledOrders?: InputMaybe<FulfilledOrdersMutation>;
   relativePath?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type DocumentMutation = {
   categories?: InputMaybe<CategoriesMutation>;
   products?: InputMaybe<ProductsMutation>;
+  fulfilledOrders?: InputMaybe<FulfilledOrdersMutation>;
 };
 
 export type CategoriesMutation = {
@@ -375,9 +436,16 @@ export type ProductsMutation = {
   active?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type FulfilledOrdersMutation = {
+  title?: InputMaybe<Scalars['String']['input']>;
+  image?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type CategoriesPartsFragment = { __typename: 'Categories', title: string, slug: string };
 
 export type ProductsPartsFragment = { __typename: 'Products', name: string, slug: string, category: string, description?: string | null, mainImage: string, active?: boolean | null, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null };
+
+export type FulfilledOrdersPartsFragment = { __typename: 'FulfilledOrders', title: string, image: string };
 
 export type CategoriesQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -417,6 +485,25 @@ export type ProductsConnectionQueryVariables = Exact<{
 
 export type ProductsConnectionQuery = { __typename?: 'Query', productsConnection: { __typename?: 'ProductsConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'ProductsConnectionEdges', cursor: string, node?: { __typename: 'Products', id: string, name: string, slug: string, category: string, description?: string | null, mainImage: string, active?: boolean | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null } | null } | null> | null } };
 
+export type FulfilledOrdersQueryVariables = Exact<{
+  relativePath: Scalars['String']['input'];
+}>;
+
+
+export type FulfilledOrdersQuery = { __typename?: 'Query', fulfilledOrders: { __typename: 'FulfilledOrders', id: string, title: string, image: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
+
+export type FulfilledOrdersConnectionQueryVariables = Exact<{
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<FulfilledOrdersFilter>;
+}>;
+
+
+export type FulfilledOrdersConnectionQuery = { __typename?: 'Query', fulfilledOrdersConnection: { __typename?: 'FulfilledOrdersConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'FulfilledOrdersConnectionEdges', cursor: string, node?: { __typename: 'FulfilledOrders', id: string, title: string, image: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
+
 export const CategoriesPartsFragmentDoc = gql`
     fragment CategoriesParts on Categories {
   __typename
@@ -437,6 +524,13 @@ export const ProductsPartsFragmentDoc = gql`
     src
   }
   active
+}
+    `;
+export const FulfilledOrdersPartsFragmentDoc = gql`
+    fragment FulfilledOrdersParts on FulfilledOrders {
+  __typename
+  title
+  image
 }
     `;
 export const CategoriesDocument = gql`
@@ -553,6 +647,63 @@ export const ProductsConnectionDocument = gql`
   }
 }
     ${ProductsPartsFragmentDoc}`;
+export const FulfilledOrdersDocument = gql`
+    query fulfilledOrders($relativePath: String!) {
+  fulfilledOrders(relativePath: $relativePath) {
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+    ...FulfilledOrdersParts
+  }
+}
+    ${FulfilledOrdersPartsFragmentDoc}`;
+export const FulfilledOrdersConnectionDocument = gql`
+    query fulfilledOrdersConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: FulfilledOrdersFilter) {
+  fulfilledOrdersConnection(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sort: $sort
+    filter: $filter
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+        ...FulfilledOrdersParts
+      }
+    }
+  }
+}
+    ${FulfilledOrdersPartsFragmentDoc}`;
 export type Requester<C= {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R>
   export function getSdk<C>(requester: Requester<C>) {
     return {
@@ -567,6 +718,12 @@ export type Requester<C= {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) 
       },
     productsConnection(variables?: ProductsConnectionQueryVariables, options?: C): Promise<{data: ProductsConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ProductsConnectionQueryVariables, query: string}> {
         return requester<{data: ProductsConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ProductsConnectionQueryVariables, query: string}, ProductsConnectionQueryVariables>(ProductsConnectionDocument, variables, options);
+      },
+    fulfilledOrders(variables: FulfilledOrdersQueryVariables, options?: C): Promise<{data: FulfilledOrdersQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: FulfilledOrdersQueryVariables, query: string}> {
+        return requester<{data: FulfilledOrdersQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: FulfilledOrdersQueryVariables, query: string}, FulfilledOrdersQueryVariables>(FulfilledOrdersDocument, variables, options);
+      },
+    fulfilledOrdersConnection(variables?: FulfilledOrdersConnectionQueryVariables, options?: C): Promise<{data: FulfilledOrdersConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: FulfilledOrdersConnectionQueryVariables, query: string}> {
+        return requester<{data: FulfilledOrdersConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: FulfilledOrdersConnectionQueryVariables, query: string}, FulfilledOrdersConnectionQueryVariables>(FulfilledOrdersConnectionDocument, variables, options);
       }
     };
   }

@@ -17,3 +17,9 @@ fragment ProductsParts on Products {
   }
   active
 }
+
+fragment FulfilledOrdersParts on FulfilledOrders {
+  __typename
+  title
+  image
+}

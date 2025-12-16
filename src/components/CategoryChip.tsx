@@ -9,10 +9,10 @@ interface CategoryChipProps {
 }
 
 export default function CategoryChip({ title, slug, isActive = false, onClick, asLink = true }: CategoryChipProps) {
-  const baseClasses = "px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer";
+  const baseClasses = "px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer whitespace-nowrap";
   const activeClasses = isActive 
-    ? "bg-accent text-white" 
-    : "bg-gray-100 text-secondary hover:bg-accent-light hover:text-accent";
+    ? "bg-accent text-white shadow-sm" 
+    : "bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent";
 
   if (asLink) {
     return (
