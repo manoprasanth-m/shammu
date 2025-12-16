@@ -15,7 +15,7 @@ export default function ImageGallery({ mainImage, images = [], productName }: Im
     <div className="space-y-4">
       <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
         <Image
-          src={allImages[selectedImage] || '/uploads/placeholder.jpg'}
+          src={allImages[selectedImage] || '/uploads/placeholder.svg'}
           alt={productName}
           fill
           className="object-cover"
@@ -35,7 +35,7 @@ export default function ImageGallery({ mainImage, images = [], productName }: Im
               }`}
             >
               <Image
-                src={image || '/uploads/placeholder.jpg'}
+                src={image || '/uploads/placeholder.svg'}
                 alt={`${productName} - Image ${index + 1}`}
                 fill
                 className="object-cover"

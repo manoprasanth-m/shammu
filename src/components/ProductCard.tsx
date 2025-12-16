@@ -12,7 +12,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow">
         <div className="relative aspect-square overflow-hidden bg-gray-100">
           <Image
-            src={product.mainImage || '/uploads/placeholder.jpg'}
+            src={product.mainImage || '/uploads/placeholder.svg'}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"

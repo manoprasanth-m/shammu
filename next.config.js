@@ -5,7 +5,12 @@ const nextConfig = {
     domains: ['localhost'],
     unoptimized: true,
   },
-  allowedDevOrigins: ['*'],
+  allowedDevOrigins: [
+    'https://*.replit.dev',
+    'https://*.replit.app',
+    'http://127.0.0.1:*',
+    'http://localhost:*'
+  ],
   async rewrites() {
     return [
       {
