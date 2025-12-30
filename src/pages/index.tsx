@@ -16,7 +16,6 @@ interface HomeProps {
 
 export default function Home({ categoryTree, products, fulfilledOrders }: HomeProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const PRODUCTS_PER_PAGE = 30;
@@ -50,18 +49,6 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
   );
 
   const whatsappLink = makeWhatsAppLink({ text: getGeneralEnquiryText() });
-
-  const toggleCategory = (slug: string) => {
-    setExpandedCategories((prev) => {
-      const next = new Set(prev);
-      if (next.has(slug)) {
-        next.delete(slug);
-      } else {
-        next.add(slug);
-      }
-      return next;
-    });
-  };
 
   return (
     <Layout>
@@ -177,9 +164,10 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
               </div>
             </div>
 
-            {/* Category Tree */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
+            {/* Category Filter - Simple Two-Row Chip Layout */}
+            <div className="flex flex-col gap-3">
+              {/* Row 1: All + Parent Categories */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
                 <button
                   onClick={() => setSelectedCategory(null)}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === null
@@ -189,65 +177,60 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
                 >
                   All
                 </button>
-              </div>
-
-              {/* Parent Categories with Expandable Subcategories */}
-              <div className="flex flex-col gap-1 mt-2">
                 {categoryTree.map((parentCat) => (
-                  <div key={parentCat.slug} className="border border-gray-100 rounded-lg bg-white overflow-hidden">
-                    <div className="flex items-center">
-                      <button
-                        onClick={() => {
-                          setSelectedCategory(parentCat.slug);
-                          if (parentCat.subcategories.length > 0) {
-                            toggleCategory(parentCat.slug);
-                          }
-                        }}
-                        className={`flex-1 px-4 py-3 text-left text-sm font-medium transition-all ${selectedCategory === parentCat.slug
-                          ? 'bg-accent/10 text-accent'
-                          : 'text-secondary hover:bg-gray-50'
-                          }`}
-                      >
-                        {parentCat.title}
-                      </button>
-                      {parentCat.subcategories.length > 0 && (
-                        <button
-                          onClick={() => toggleCategory(parentCat.slug)}
-                          className="px-3 py-3 text-gray-400 hover:text-accent transition-colors"
-                          aria-label={expandedCategories.has(parentCat.slug) ? 'Collapse' : 'Expand'}
-                        >
-                          <svg
-                            className={`w-4 h-4 transition-transform ${expandedCategories.has(parentCat.slug) ? 'rotate-180' : ''}`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Subcategories */}
-                    {expandedCategories.has(parentCat.slug) && parentCat.subcategories.length > 0 && (
-                      <div className="border-t border-gray-100 bg-gray-50/50">
-                        {parentCat.subcategories.map((subcat) => (
-                          <button
-                            key={subcat.slug}
-                            onClick={() => setSelectedCategory(subcat.slug)}
-                            className={`w-full px-6 py-2 text-left text-sm transition-all ${selectedCategory === subcat.slug
-                              ? 'bg-accent/10 text-accent font-medium'
-                              : 'text-gray-600 hover:bg-gray-100'
-                              }`}
-                          >
-                            ↳ {subcat.title}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <button
+                    key={parentCat.slug}
+                    onClick={() => setSelectedCategory(parentCat.slug)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === parentCat.slug ||
+                      parentCat.subcategories.some((sub) => sub.slug === selectedCategory)
+                      ? 'bg-accent text-white shadow-sm'
+                      : 'bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent'
+                      }`}
+                  >
+                    {parentCat.title}
+                  </button>
                 ))}
               </div>
+
+              {/* Row 2: Subcategories (shown when parent is selected) */}
+              {(() => {
+                // Find if a parent category is selected or if a subcategory's parent should show subs
+                const selectedParent = categoryTree.find((c) => c.slug === selectedCategory);
+                const parentOfSelected = categoryTree.find((c) =>
+                  c.subcategories.some((sub) => sub.slug === selectedCategory)
+                );
+                const activeParent = selectedParent || parentOfSelected;
+
+                if (activeParent && activeParent.subcategories.length > 0) {
+                  return (
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                      <span className="text-sm text-gray-500 whitespace-nowrap">Subcategories:</span>
+                      <button
+                        onClick={() => setSelectedCategory(activeParent.slug)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === activeParent.slug
+                          ? 'bg-accent/20 text-accent border border-accent'
+                          : 'bg-gray-100 text-gray-600 hover:bg-accent/10 hover:text-accent'
+                          }`}
+                      >
+                        All {activeParent.title}
+                      </button>
+                      {activeParent.subcategories.map((subcat) => (
+                        <button
+                          key={subcat.slug}
+                          onClick={() => setSelectedCategory(subcat.slug)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === subcat.slug
+                            ? 'bg-accent/20 text-accent border border-accent'
+                            : 'bg-gray-100 text-gray-600 hover:bg-accent/10 hover:text-accent'
+                            }`}
+                        >
+                          {subcat.title}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
 
