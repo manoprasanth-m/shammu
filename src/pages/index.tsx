@@ -55,13 +55,13 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
       <section className="bg-gradient-to-br from-accent-light to-white py-16 md:py-20 border-b border-gray-100">
         <div className="container text-center">
           <p className="text-sm font-semibold tracking-[0.2em] uppercase text-accent mb-3">
-            One-of-a-kind · Curated · Bespoke
+            Exclusive · Curated · By Request
           </p>
           <h1 className="text-3xl md:text-5xl font-bold text-secondary mb-4">
-            Rare treasures and custom sourcing, made effortless
+            Sourced pieces you won’t find on the usual shelves, secured through our network
           </h1>
           <p className="text-base md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            We curate antiques and hard-to-find pieces — and we can source almost anything on request. Browse the collection, then WhatsApp us to enquire or request a specific item.
+            Browse the collection, or send a brief for something specific—rare, vintage, or made-to-order. WhatsApp us to request sourcing, quotes, and timelines.
           </p>
           <a
             href={whatsappLink}
