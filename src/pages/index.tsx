@@ -55,14 +55,13 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
       <section className="bg-gradient-to-br from-accent-light to-white py-16 md:py-20 border-b border-gray-100">
         <div className="container text-center">
           <p className="text-sm font-semibold tracking-[0.2em] uppercase text-accent mb-3">
-            Handcrafted · Curated · Made with love
+            One-of-a-kind · Curated · Bespoke
           </p>
           <h1 className="text-3xl md:text-5xl font-bold text-secondary mb-4">
-            Unique handcrafted pieces for every occasion
+            Rare treasures and custom sourcing, made effortless
           </h1>
           <p className="text-base md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Explore curated gifts, decor, and custom creations. Discover something special and
-            reach out on WhatsApp to make it yours.
+            We curate antiques and hard-to-find pieces — and we can source almost anything on request. Browse the collection, then WhatsApp us to enquire or request a specific item.
           </p>
           <a
             href={whatsappLink}
