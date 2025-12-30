@@ -1,0 +1,8 @@
+{
+  "name": "Custom Wall paint",
+  "slug": "custom-wall-paint",
+  "category": "content/categories/home-decor.json",
+  "subcategory": "content/subcategories/wall-art.json",
+  "mainImage": "/uploads/pp24010387_p00.jpg",
+  "active": true
+}
