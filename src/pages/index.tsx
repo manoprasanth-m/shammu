@@ -18,7 +18,7 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const PRODUCTS_PER_PAGE = 30;
+  const PRODUCTS_PER_PAGE = 20;
 
   // Filter products by selected category (matching either category or subcategory slug)
   const filteredProducts = selectedCategory
@@ -115,8 +115,103 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
         </div>
       </section>
 
+      <section id="products" className="py-16 md:py-24">
+        <div className="container">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+            <div>
+              <h2 className="text-3xl font-bold text-secondary mb-2">Our Collection</h2>
+              <p className="text-gray-600">Handpicked treasures for your home and lifestyle</p>
+            </div>
+
+            {/* Category Chips */}
+            <div className="w-full md:w-auto">
+              {/* Parent Categories */}
+              <div className="flex flex-wrap gap-2 mb-2">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === null
+                    ? 'bg-accent text-white shadow-sm'
+                    : 'bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent'
+                    }`}
+                >
+                  All
+                </button>
+                {categoryTree.map((category) => (
+                  <button
+                    key={category.slug}
+                    onClick={() => setSelectedCategory(selectedCategory === category.slug ? null : category.slug)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === category.slug
+                      ? 'bg-accent text-white shadow-sm'
+                      : 'bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent'
+                      }`}
+                  >
+                    {category.title}
+                  </button>
+                ))}
+              </div>
+
+              {/* Subcategories (only shown when parent is selected) */}
+              {selectedCategory && (
+                <div className="flex flex-wrap gap-2 pl-2 animate-fadeIn bg-gray-50 p-2 rounded-lg border border-gray-100">
+                  <span className="text-xs text-gray-400 font-medium py-1 px-1">Subcategories:</span>
+                  {categoryTree
+                    .find(c => c.slug === selectedCategory)
+                    ?.subcategories.map(sub => (
+                      <Link
+                        key={sub.slug}
+                        href={`/category/${sub.slug}`} // Navigate to subcategory page
+                        className="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent"
+                      >
+                        {sub.title}
+                      </Link>
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+            {paginatedProducts.map((product) => (
+              <ProductCard key={product.slug} product={product} categoryTree={categoryTree} />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-12 gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-gray-50"
+              >
+                Previous
+              </button>
+              <span className="px-4 py-2 text-gray-600">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-gray-50"
+              >
+                Next
+              </button>
+            </div>
+          )}
+
+          <div className="mt-12 text-center">
+            <Link href="/products" className="btn-secondary inline-flex items-center gap-2 px-8 py-3 text-lg">
+              View All Products
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Fulfilled Orders Moved Below */}
       {fulfilledOrders.length > 0 && (
-        <section className="py-14 bg-white">
+        <section className="py-16 bg-gray-50 border-t border-gray-100">
           <div className="container">
             <h2 className="text-3xl font-bold text-secondary mb-4 text-center">
               Fulfilled Orders
@@ -129,7 +224,7 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
               {fulfilledOrders.map((order) => (
                 <div
                   key={order.title}
-                  className="bg-gray-50 rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
                 >
                   <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
                     <img
@@ -150,146 +245,6 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
           </div>
         </section>
       )}
-
-      <section id="products" className="py-16 bg-gray-50 border-t border-gray-100">
-        <div className="container">
-          <div className="flex flex-col gap-6 mb-8">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
-              <div>
-                <h2 className="text-3xl font-bold text-secondary">All Products</h2>
-                <p className="text-gray-500 text-sm mt-1">
-                  Browse our latest handcrafted pieces across all categories.
-                </p>
-              </div>
-            </div>
-
-            {/* Category Filter - Simple Two-Row Chip Layout */}
-            <div className="flex flex-col gap-3">
-              {/* Row 1: All + Parent Categories */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                <button
-                  onClick={() => setSelectedCategory(null)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === null
-                    ? 'bg-accent text-white shadow-sm'
-                    : 'bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent'
-                    }`}
-                >
-                  All
-                </button>
-                {categoryTree.map((parentCat) => (
-                  <button
-                    key={parentCat.slug}
-                    onClick={() => setSelectedCategory(parentCat.slug)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === parentCat.slug ||
-                      parentCat.subcategories.some((sub) => sub.slug === selectedCategory)
-                      ? 'bg-accent text-white shadow-sm'
-                      : 'bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent'
-                      }`}
-                  >
-                    {parentCat.title}
-                  </button>
-                ))}
-              </div>
-
-              {/* Row 2: Subcategories (shown when parent is selected) */}
-              {(() => {
-                // Find if a parent category is selected or if a subcategory's parent should show subs
-                const selectedParent = categoryTree.find((c) => c.slug === selectedCategory);
-                const parentOfSelected = categoryTree.find((c) =>
-                  c.subcategories.some((sub) => sub.slug === selectedCategory)
-                );
-                const activeParent = selectedParent || parentOfSelected;
-
-                if (activeParent && activeParent.subcategories.length > 0) {
-                  return (
-                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                      <span className="text-sm text-gray-500 whitespace-nowrap">Subcategories:</span>
-                      <button
-                        onClick={() => setSelectedCategory(activeParent.slug)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === activeParent.slug
-                          ? 'bg-accent/20 text-accent border border-accent'
-                          : 'bg-gray-100 text-gray-600 hover:bg-accent/10 hover:text-accent'
-                          }`}
-                      >
-                        All {activeParent.title}
-                      </button>
-                      {activeParent.subcategories.map((subcat) => (
-                        <button
-                          key={subcat.slug}
-                          onClick={() => setSelectedCategory(subcat.slug)}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${selectedCategory === subcat.slug
-                            ? 'bg-accent/20 text-accent border border-accent'
-                            : 'bg-gray-100 text-gray-600 hover:bg-accent/10 hover:text-accent'
-                            }`}
-                        >
-                          {subcat.title}
-                        </button>
-                      ))}
-                    </div>
-                  );
-                }
-                return null;
-              })()}
-            </div>
-          </div>
-
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No products found in this category.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {paginatedProducts.map((product) => (
-                <ProductCard key={product.slug} product={product} categoryTree={categoryTree} />
-              ))}
-            </div>
-          )}
-
-          {filteredProducts.length > PRODUCTS_PER_PAGE && (
-            <div className="flex items-center justify-center gap-2 mt-10">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${currentPage === 1
-                  ? 'border-gray-200 text-gray-300 cursor-not-allowed'
-                  : 'border-accent text-accent hover:bg-accent hover:text-white'
-                  }`}
-              >
-                Previous
-              </button>
-
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }).map((_, index) => {
-                  const page = index + 1;
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-9 h-9 rounded-full text-sm font-medium transition-all ${currentPage === page
-                        ? 'bg-accent text-white'
-                        : 'bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent'
-                        }`}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${currentPage === totalPages
-                  ? 'border-gray-200 text-gray-300 cursor-not-allowed'
-                  : 'border-accent text-accent hover:bg-accent hover:text-white'
-                  }`}
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
     </Layout>
   );
 }
