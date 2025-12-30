@@ -115,23 +115,26 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
         </div>
       </section>
 
-      <section id="products" className="py-16 md:py-24">
+      <section id="products" className="py-20">
         <div className="container">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-            <div>
-              <h2 className="text-3xl font-bold text-secondary mb-2">Our Collection</h2>
-              <p className="text-gray-600">Handpicked treasures for your home and lifestyle</p>
-            </div>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-3 font-heading">Our Collection</h2>
+            <p className="text-gray-500 max-w-2xl mx-auto">
+              Curated categories of handcrafted excellence. Filter by category to find your perfect piece.
+            </p>
+          </div>
 
-            {/* Category Chips */}
-            <div className="w-full md:w-auto">
-              {/* Parent Categories */}
-              <div className="flex flex-wrap gap-2 mb-2">
+          {/* Sticky Category Nav */}
+          <div className="sticky top-20 z-30 bg-white/95 backdrop-blur-sm py-4 -mx-4 px-4 border-b border-gray-100 mb-10 transition-all">
+            <div className="flex flex-col items-center gap-4">
+
+              {/* Parent Categories - Pill Tabs */}
+              <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-2 scrollbar-hide">
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === null
-                    ? 'bg-accent text-white shadow-sm'
-                    : 'bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent'
+                  className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 flex-shrink-0 ${selectedCategory === null
+                      ? 'bg-secondary text-white shadow-lg shadow-secondary/20 scale-105'
+                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                     }`}
                 >
                   All
@@ -140,9 +143,9 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
                   <button
                     key={category.slug}
                     onClick={() => setSelectedCategory(selectedCategory === category.slug ? null : category.slug)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === category.slug
-                      ? 'bg-accent text-white shadow-sm'
-                      : 'bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent'
+                    className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 flex-shrink-0 ${selectedCategory === category.slug
+                        ? 'bg-secondary text-white shadow-lg shadow-secondary/20 scale-105'
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                       }`}
                   >
                     {category.title}
@@ -150,17 +153,19 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
                 ))}
               </div>
 
-              {/* Subcategories (only shown when parent is selected) */}
+              {/* Subcategories - Minimal Text Links */}
               {selectedCategory && (
-                <div className="flex flex-wrap gap-2 pl-2 animate-fadeIn bg-gray-50 p-2 rounded-lg border border-gray-100">
-                  <span className="text-xs text-gray-400 font-medium py-1 px-1">Subcategories:</span>
+                <div className="animate-fadeIn flex flex-wrap justify-center gap-3 md:gap-6 bg-gray-50/50 px-6 py-3 rounded-2xl">
+                  <span className="text-xs font-semibold text-accent uppercase tracking-wider flex items-center mr-2">
+                    Explore {categoryTree.find(c => c.slug === selectedCategory)?.title}:
+                  </span>
                   {categoryTree
                     .find(c => c.slug === selectedCategory)
                     ?.subcategories.map(sub => (
                       <Link
                         key={sub.slug}
-                        href={`/category/${sub.slug}`} // Navigate to subcategory page
-                        className="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent"
+                        href={`/category/${sub.slug}`}
+                        className="text-sm font-medium text-gray-600 hover:text-secondary hover:underline decoration-accent decoration-2 underline-offset-4 transition-colors"
                       >
                         {sub.title}
                       </Link>
@@ -170,38 +175,41 @@ export default function Home({ categoryTree, products, fulfilledOrders }: HomePr
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
             {paginatedProducts.map((product) => (
               <ProductCard key={product.slug} product={product} categoryTree={categoryTree} />
             ))}
           </div>
 
           {totalPages > 1 && (
-            <div className="flex justify-center mt-12 gap-2">
+            <div className="flex justify-center mt-16 gap-3">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-gray-50"
+                className="px-5 py-2.5 border border-gray-200 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:border-secondary hover:text-secondary transition-colors"
               >
                 Previous
               </button>
-              <span className="px-4 py-2 text-gray-600">
+              <div className="flex items-center px-4 bg-gray-50 rounded-lg border border-gray-100 text-sm font-medium text-gray-600">
                 Page {currentPage} of {totalPages}
-              </span>
+              </div>
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-gray-50"
+                className="px-5 py-2.5 border border-gray-200 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:border-secondary hover:text-secondary transition-colors"
               >
                 Next
               </button>
             </div>
           )}
 
-          <div className="mt-12 text-center">
-            <Link href="/products" className="btn-secondary inline-flex items-center gap-2 px-8 py-3 text-lg">
-              View All Products
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mt-16 text-center">
+            <Link
+              href="/products"
+              className="group inline-flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-secondary text-secondary font-semibold rounded-full hover:bg-secondary hover:text-white transition-all duration-300"
+            >
+              View Full Collection
+              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </Link>
