@@ -1,0 +1,14 @@
+{
+  "name": "Silver vessel",
+  "slug": "silvervessel",
+  "category": "content/categories/silver.json",
+  "subcategory": "",
+  "description": "German made vessel imported directly.",
+  "mainImage": "/uploads/a2321a-antique-beakers_1112_detail.jpg",
+  "images": [
+    {
+      "src": "/uploads/a2321a-antique-beakers_1112_detail.jpg"
+    }
+  ],
+  "active": true
+}
