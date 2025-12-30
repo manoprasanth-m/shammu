@@ -2,30 +2,17 @@ fragment CategoriesParts on Categories {
   __typename
   title
   slug
+}
+
+fragment SubcategoriesParts on Subcategories {
+  __typename
+  title
+  slug
   parentCategory {
     ... on Categories {
       __typename
       title
       slug
-      parentCategory {
-        ... on Categories {
-          __typename
-          title
-          slug
-        }
-        ... on Document {
-          _sys {
-            filename
-            basename
-            hasReferences
-            breadcrumbs
-            path
-            relativePath
-            extension
-          }
-          id
-        }
-      }
     }
     ... on Document {
       _sys {
@@ -51,25 +38,6 @@ fragment ProductsParts on Products {
       __typename
       title
       slug
-      parentCategory {
-        ... on Categories {
-          __typename
-          title
-          slug
-        }
-        ... on Document {
-          _sys {
-            filename
-            basename
-            hasReferences
-            breadcrumbs
-            path
-            relativePath
-            extension
-          }
-          id
-        }
-      }
     }
     ... on Document {
       _sys {
@@ -85,7 +53,7 @@ fragment ProductsParts on Products {
     }
   }
   subcategory {
-    ... on Categories {
+    ... on Subcategories {
       __typename
       title
       slug

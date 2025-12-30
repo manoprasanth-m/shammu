@@ -1,17 +1,19 @@
 import fs from 'fs';
 import path from 'path';
 
-// Re-export types and utility functions from types.ts for backward compatibility
-export type { Category, Product, FulfilledOrder, CategoryWithSubs } from './types';
+// Re-export types and utility functions from types.ts
+export type { Category, Product, FulfilledOrder, CategoryWithSubs, Subcategory } from './types';
 export { slugFromReference } from './types';
 
-import type { Category, Product, FulfilledOrder } from './types';
+import type { Category, Product, FulfilledOrder, Subcategory } from './types';
 import { slugFromReference } from './types';
 
 const CATEGORIES_DIR = path.join(process.cwd(), 'content/categories');
+const SUBCATEGORIES_DIR = path.join(process.cwd(), 'content/subcategories');
 const PRODUCTS_DIR = path.join(process.cwd(), 'content/products');
 const FULFILLED_ORDERS_DIR = path.join(process.cwd(), 'content/fulfilled-orders');
 
+// Get only top-level parent categories
 export function getAllCategories(): Category[] {
   try {
     if (!fs.existsSync(CATEGORIES_DIR)) {
@@ -36,27 +38,45 @@ export function getAllCategories(): Category[] {
   }
 }
 
-// Get only top-level categories (those without parentCategory)
+// Get all subcategories from the new subcategories collection
+export function getAllSubcategories(): Subcategory[] {
+  try {
+    if (!fs.existsSync(SUBCATEGORIES_DIR)) {
+      return [];
+    }
+    const files = fs.readdirSync(SUBCATEGORIES_DIR);
+    const subcategories: Subcategory[] = [];
+
+    for (const file of files) {
+      if (file.endsWith('.json')) {
+        const filePath = path.join(SUBCATEGORIES_DIR, file);
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(content);
+        subcategories.push(data);
+      }
+    }
+    return subcategories.sort((a, b) => a.title.localeCompare(b.title));
+  } catch (error) {
+    console.error('Error reading subcategories:', error);
+    return [];
+  }
+}
+
+// Get parent categories (alias for getAllCategories now, kept for compatibility)
 export function getParentCategories(): Category[] {
-  const allCategories = getAllCategories();
-  return allCategories.filter((cat) => !cat.parentCategory);
+  return getAllCategories();
 }
 
 // Get subcategories for a given parent category slug
-export function getSubcategories(parentSlug: string): Category[] {
-  const allCategories = getAllCategories();
-  return allCategories.filter((cat) => {
-    const parentRef = slugFromReference(cat.parentCategory);
+export function getSubcategories(parentSlug: string): Subcategory[] {
+  const allSubcategories = getAllSubcategories();
+  return allSubcategories.filter((sub) => {
+    const parentRef = slugFromReference(sub.parentCategory);
     return parentRef === parentSlug;
   });
 }
 
-// Get all categories that are subcategories (have a parent)
-export function getAllSubcategories(): Category[] {
-  const allCategories = getAllCategories();
-  return allCategories.filter((cat) => cat.parentCategory);
-}
-
+// Get a top-level category by slug
 export function getCategoryBySlug(slug: string): Category | null {
   try {
     const filePath = path.join(CATEGORIES_DIR, `${slug}.json`);
@@ -71,14 +91,29 @@ export function getCategoryBySlug(slug: string): Category | null {
   }
 }
 
-// Get the parent category for a given category (if it has one)
-export function getParentCategoryOf(category: Category): Category | null {
-  if (!category.parentCategory) return null;
-  const parentSlug = slugFromReference(category.parentCategory);
+// Get a subcategory by slug
+export function getSubcategoryBySlug(slug: string): Subcategory | null {
+  try {
+    const filePath = path.join(SUBCATEGORIES_DIR, `${slug}.json`);
+    if (!fs.existsSync(filePath)) {
+      return null;
+    }
+    const content = fs.readFileSync(filePath, 'utf-8');
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('Error reading subcategory:', error);
+    return null;
+  }
+}
+
+// Get the parent category for a given subcategory
+export function getParentCategoryOf(subcategory: Subcategory): Category | null {
+  if (!subcategory.parentCategory) return null;
+  const parentSlug = slugFromReference(subcategory.parentCategory);
   return parentSlug ? getCategoryBySlug(parentSlug) : null;
 }
 
-// Build a full category path string like "Home Decor / Wall Art"
+// Build a full category path string
 export function getCategoryPath(categorySlug: string | null, subcategorySlug: string | null): string {
   const parts: string[] = [];
 
@@ -88,7 +123,7 @@ export function getCategoryPath(categorySlug: string | null, subcategorySlug: st
   }
 
   if (subcategorySlug) {
-    const subcategory = getCategoryBySlug(subcategorySlug);
+    const subcategory = getSubcategoryBySlug(subcategorySlug);
     if (subcategory) parts.push(subcategory.title);
   }
 
@@ -121,14 +156,14 @@ export function getAllProducts(): Product[] {
   }
 }
 
-// Get products by category slug (matches both category and subcategory)
-export function getProductsByCategory(categorySlug: string): Product[] {
+// Get products by category slug (matches either parent category or subcategory)
+export function getProductsByCategory(slug: string): Product[] {
   const allProducts = getAllProducts();
   return allProducts.filter((product) => {
     const productCatSlug = slugFromReference(product.category);
     const productSubcatSlug = slugFromReference(product.subcategory);
     // Match if the category slug matches product's category OR subcategory
-    return productCatSlug === categorySlug || productSubcatSlug === categorySlug;
+    return productCatSlug === slug || productSubcatSlug === slug;
   });
 }
 

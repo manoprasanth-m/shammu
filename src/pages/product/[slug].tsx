@@ -2,13 +2,14 @@ import { GetStaticProps, GetStaticPaths } from 'next';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
 import ImageGallery from '@/components/ImageGallery';
-import { getAllProducts, getProductBySlug, getCategoryBySlug, Product, Category, slugFromReference } from '@/lib/data';
+import { getAllProducts, getProductBySlug, getCategoryBySlug, getSubcategoryBySlug } from '@/lib/data';
+import { Category, Product, Subcategory, slugFromReference } from '@/lib/types';
 import { makeWhatsAppLink, getProductEnquiryText, getAbsoluteUrl } from '@/lib/whatsapp';
 
 interface ProductPageProps {
   product: Product;
   category: Category | null;
-  subcategory: Category | null;
+  subcategory: Subcategory | null;
 }
 
 export default function ProductPage({ product, category, subcategory }: ProductPageProps) {
@@ -134,7 +135,7 @@ export const getStaticProps: GetStaticProps<ProductPageProps> = async ({ params 
   const subcategorySlug = slugFromReference(product.subcategory);
 
   const category = categorySlug ? getCategoryBySlug(categorySlug) : null;
-  const subcategory = subcategorySlug ? getCategoryBySlug(subcategorySlug) : null;
+  const subcategory = subcategorySlug ? getSubcategoryBySlug(subcategorySlug) : null;
 
   return {
     props: {

@@ -17,17 +17,21 @@ var config_default = defineConfig({
   },
   schema: {
     collections: [
+      // =====================
+      // CATEGORIES (Parent/Top-Level)
+      // =====================
       {
         name: "categories",
-        label: "Categories",
+        label: "\u{1F4C1} Categories (Parent)",
         path: "content/categories",
         format: "json",
         fields: [
           {
             type: "string",
             name: "title",
-            label: "Title",
-            required: true
+            label: "Category Name",
+            required: true,
+            description: 'Name of this main/parent category (e.g., "Home Decor", "Apparel")'
           },
           {
             type: "string",
@@ -35,12 +39,6 @@ var config_default = defineConfig({
             label: "Slug",
             required: true,
             description: "URL-friendly name (lowercase, hyphens instead of spaces)"
-          },
-          {
-            type: "reference",
-            name: "parentCategory",
-            label: "Parent Category (leave empty for top-level)",
-            collections: ["categories"]
           }
         ],
         ui: {
@@ -52,9 +50,53 @@ var config_default = defineConfig({
           }
         }
       },
+      // =====================
+      // SUBCATEGORIES (Children of Categories)
+      // =====================
+      {
+        name: "subcategories",
+        label: "\u{1F4C2} Subcategories (Children)",
+        path: "content/subcategories",
+        format: "json",
+        fields: [
+          {
+            type: "string",
+            name: "title",
+            label: "Subcategory Name",
+            required: true,
+            description: 'Name of this subcategory (e.g., "Wall Art" under "Home Decor")'
+          },
+          {
+            type: "string",
+            name: "slug",
+            label: "Slug",
+            required: true,
+            description: "URL-friendly name (lowercase, hyphens instead of spaces)"
+          },
+          {
+            type: "reference",
+            name: "parentCategory",
+            label: "\u2B06\uFE0F Parent Category",
+            required: true,
+            collections: ["categories"],
+            description: "Select which main category this subcategory belongs to"
+          }
+        ],
+        ui: {
+          filename: {
+            readonly: false,
+            slugify: (values) => {
+              return values?.slug?.toLowerCase().replace(/ /g, "-") || "";
+            }
+          }
+        }
+      },
+      // =====================
+      // PRODUCTS
+      // =====================
       {
         name: "products",
-        label: "Products",
+        label: "\u{1F6CD}\uFE0F Products",
         path: "content/products",
         format: "json",
         fields: [
@@ -74,15 +116,17 @@ var config_default = defineConfig({
           {
             type: "reference",
             name: "category",
-            label: "Category",
+            label: "\u{1F4C1} Category",
             required: true,
-            collections: ["categories"]
+            collections: ["categories"],
+            description: "Select the main/parent category for this product"
           },
           {
             type: "reference",
             name: "subcategory",
-            label: "Subcategory (optional)",
-            collections: ["categories"]
+            label: "\u{1F4C2} Subcategory (optional)",
+            collections: ["subcategories"],
+            description: "Optionally select a subcategory within the parent category"
           },
           {
             type: "string",
@@ -130,9 +174,12 @@ var config_default = defineConfig({
           active: true
         })
       },
+      // =====================
+      // FULFILLED ORDERS
+      // =====================
       {
         name: "fulfilledOrders",
-        label: "Fulfilled Orders",
+        label: "\u2705 Fulfilled Orders",
         path: "content/fulfilled-orders",
         format: "json",
         fields: [

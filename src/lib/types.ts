@@ -1,16 +1,23 @@
 // Types that can be safely imported on both client and server
 
+// Parent/top-level category
 export interface Category {
     title: string;
     slug: string;
-    parentCategory?: string; // Reference path like "content/categories/home-decor.json"
+}
+
+// Subcategory (child of a category)
+export interface Subcategory {
+    title: string;
+    slug: string;
+    parentCategory: string; // Reference path like "content/categories/home-decor.json"
 }
 
 export interface Product {
     name: string;
     slug: string;
     category: string;  // Reference path like "content/categories/home-decor.json"
-    subcategory?: string; // Reference path like "content/categories/wall-art.json"
+    subcategory?: string; // Reference path like "content/subcategories/wall-art.json"
     description?: string;
     mainImage: string;
     images?: string[];
@@ -23,13 +30,18 @@ export interface FulfilledOrder {
 }
 
 export interface CategoryWithSubs extends Category {
-    subcategories: Category[];
+    subcategories: Subcategory[];
 }
 
 // Pure utility function that can be used on both client and server
-// Extracts slug from TinaCMS reference path (e.g., "content/categories/home-decor.json" -> "home-decor")
+// Extracts slug from TinaCMS reference path
 export function slugFromReference(ref: string | undefined): string | null {
     if (!ref) return null;
-    const match = ref.match(/content\/categories\/(.+)\.json$/);
-    return match ? match[1] : ref; // Fallback to ref itself if it's already a slug
+    // Handle both categories and subcategories paths
+    const catMatch = ref.match(/content\/categories\/(.+)\.json$/);
+    if (catMatch) return catMatch[1];
+    const subcatMatch = ref.match(/content\/subcategories\/(.+)\.json$/);
+    if (subcatMatch) return subcatMatch[1];
+    return ref; // Fallback to ref itself if it's already a slug
 }
+

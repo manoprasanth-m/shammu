@@ -53,6 +53,61 @@ query categoriesConnection($before: String, $after: String, $first: Float, $last
   }
 }
 
+query subcategories($relativePath: String!) {
+  subcategories(relativePath: $relativePath) {
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+    ...SubcategoriesParts
+  }
+}
+
+query subcategoriesConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: SubcategoriesFilter) {
+  subcategoriesConnection(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sort: $sort
+    filter: $filter
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+        ...SubcategoriesParts
+      }
+    }
+  }
+}
+
 query products($relativePath: String!) {
   products(relativePath: $relativePath) {
     ... on Document {

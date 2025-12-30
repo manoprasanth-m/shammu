@@ -84,6 +84,8 @@ export type Query = {
   document: DocumentNode;
   categories: Categories;
   categoriesConnection: CategoriesConnection;
+  subcategories: Subcategories;
+  subcategoriesConnection: SubcategoriesConnection;
   products: Products;
   productsConnection: ProductsConnection;
   fulfilledOrders: FulfilledOrders;
@@ -127,6 +129,21 @@ export type QueryCategoriesConnectionArgs = {
 };
 
 
+export type QuerySubcategoriesArgs = {
+  relativePath?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QuerySubcategoriesConnectionArgs = {
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<SubcategoriesFilter>;
+};
+
+
 export type QueryProductsArgs = {
   relativePath?: InputMaybe<Scalars['String']['input']>;
 };
@@ -158,6 +175,7 @@ export type QueryFulfilledOrdersConnectionArgs = {
 
 export type DocumentFilter = {
   categories?: InputMaybe<CategoriesFilter>;
+  subcategories?: InputMaybe<SubcategoriesFilter>;
   products?: InputMaybe<ProductsFilter>;
   fulfilledOrders?: InputMaybe<FulfilledOrdersFilter>;
 };
@@ -199,15 +217,12 @@ export type CollectionDocumentsArgs = {
   folder?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type DocumentNode = Categories | Products | FulfilledOrders | Folder;
-
-export type CategoriesParentCategory = Categories;
+export type DocumentNode = Categories | Subcategories | Products | FulfilledOrders | Folder;
 
 export type Categories = Node & Document & {
   __typename?: 'Categories';
   title: Scalars['String']['output'];
   slug: Scalars['String']['output'];
-  parentCategory?: Maybe<CategoriesParentCategory>;
   id: Scalars['ID']['output'];
   _sys: SystemInfo;
   _values: Scalars['JSON']['output'];
@@ -220,14 +235,9 @@ export type StringFilter = {
   in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
-export type CategoriesParentCategoryFilter = {
-  categories?: InputMaybe<CategoriesFilter>;
-};
-
 export type CategoriesFilter = {
   title?: InputMaybe<StringFilter>;
   slug?: InputMaybe<StringFilter>;
-  parentCategory?: InputMaybe<CategoriesParentCategoryFilter>;
 };
 
 export type CategoriesConnectionEdges = {
@@ -243,9 +253,44 @@ export type CategoriesConnection = Connection & {
   edges?: Maybe<Array<Maybe<CategoriesConnectionEdges>>>;
 };
 
+export type SubcategoriesParentCategory = Categories;
+
+export type Subcategories = Node & Document & {
+  __typename?: 'Subcategories';
+  title: Scalars['String']['output'];
+  slug: Scalars['String']['output'];
+  parentCategory: SubcategoriesParentCategory;
+  id: Scalars['ID']['output'];
+  _sys: SystemInfo;
+  _values: Scalars['JSON']['output'];
+};
+
+export type SubcategoriesParentCategoryFilter = {
+  categories?: InputMaybe<CategoriesFilter>;
+};
+
+export type SubcategoriesFilter = {
+  title?: InputMaybe<StringFilter>;
+  slug?: InputMaybe<StringFilter>;
+  parentCategory?: InputMaybe<SubcategoriesParentCategoryFilter>;
+};
+
+export type SubcategoriesConnectionEdges = {
+  __typename?: 'SubcategoriesConnectionEdges';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<Subcategories>;
+};
+
+export type SubcategoriesConnection = Connection & {
+  __typename?: 'SubcategoriesConnection';
+  pageInfo: PageInfo;
+  totalCount: Scalars['Float']['output'];
+  edges?: Maybe<Array<Maybe<SubcategoriesConnectionEdges>>>;
+};
+
 export type ProductsCategory = Categories;
 
-export type ProductsSubcategory = Categories;
+export type ProductsSubcategory = Subcategories;
 
 export type ProductsImages = {
   __typename?: 'ProductsImages';
@@ -272,7 +317,7 @@ export type ProductsCategoryFilter = {
 };
 
 export type ProductsSubcategoryFilter = {
-  categories?: InputMaybe<CategoriesFilter>;
+  subcategories?: InputMaybe<SubcategoriesFilter>;
 };
 
 export type ImageFilter = {
@@ -351,6 +396,8 @@ export type Mutation = {
   createFolder: DocumentNode;
   updateCategories: Categories;
   createCategories: Categories;
+  updateSubcategories: Subcategories;
+  createSubcategories: Subcategories;
   updateProducts: Products;
   createProducts: Products;
   updateFulfilledOrders: FulfilledOrders;
@@ -403,6 +450,18 @@ export type MutationCreateCategoriesArgs = {
 };
 
 
+export type MutationUpdateSubcategoriesArgs = {
+  relativePath: Scalars['String']['input'];
+  params: SubcategoriesMutation;
+};
+
+
+export type MutationCreateSubcategoriesArgs = {
+  relativePath: Scalars['String']['input'];
+  params: SubcategoriesMutation;
+};
+
+
 export type MutationUpdateProductsArgs = {
   relativePath: Scalars['String']['input'];
   params: ProductsMutation;
@@ -428,6 +487,7 @@ export type MutationCreateFulfilledOrdersArgs = {
 
 export type DocumentUpdateMutation = {
   categories?: InputMaybe<CategoriesMutation>;
+  subcategories?: InputMaybe<SubcategoriesMutation>;
   products?: InputMaybe<ProductsMutation>;
   fulfilledOrders?: InputMaybe<FulfilledOrdersMutation>;
   relativePath?: InputMaybe<Scalars['String']['input']>;
@@ -435,11 +495,17 @@ export type DocumentUpdateMutation = {
 
 export type DocumentMutation = {
   categories?: InputMaybe<CategoriesMutation>;
+  subcategories?: InputMaybe<SubcategoriesMutation>;
   products?: InputMaybe<ProductsMutation>;
   fulfilledOrders?: InputMaybe<FulfilledOrdersMutation>;
 };
 
 export type CategoriesMutation = {
+  title?: InputMaybe<Scalars['String']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type SubcategoriesMutation = {
   title?: InputMaybe<Scalars['String']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
   parentCategory?: InputMaybe<Scalars['String']['input']>;
@@ -465,9 +531,11 @@ export type FulfilledOrdersMutation = {
   image?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type CategoriesPartsFragment = { __typename: 'Categories', title: string, slug: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null };
+export type CategoriesPartsFragment = { __typename: 'Categories', title: string, slug: string };
 
-export type ProductsPartsFragment = { __typename: 'Products', name: string, slug: string, description?: string | null, mainImage: string, active?: boolean | null, category: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, subcategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null };
+export type SubcategoriesPartsFragment = { __typename: 'Subcategories', title: string, slug: string, parentCategory: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
+
+export type ProductsPartsFragment = { __typename: 'Products', name: string, slug: string, description?: string | null, mainImage: string, active?: boolean | null, category: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, subcategory?: { __typename: 'Subcategories', title: string, slug: string, id: string, parentCategory: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null };
 
 export type FulfilledOrdersPartsFragment = { __typename: 'FulfilledOrders', title: string, image: string };
 
@@ -476,7 +544,7 @@ export type CategoriesQueryVariables = Exact<{
 }>;
 
 
-export type CategoriesQuery = { __typename?: 'Query', categories: { __typename: 'Categories', id: string, title: string, slug: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } };
+export type CategoriesQuery = { __typename?: 'Query', categories: { __typename: 'Categories', id: string, title: string, slug: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
 
 export type CategoriesConnectionQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -488,14 +556,33 @@ export type CategoriesConnectionQueryVariables = Exact<{
 }>;
 
 
-export type CategoriesConnectionQuery = { __typename?: 'Query', categoriesConnection: { __typename?: 'CategoriesConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'CategoriesConnectionEdges', cursor: string, node?: { __typename: 'Categories', id: string, title: string, slug: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null } | null> | null } };
+export type CategoriesConnectionQuery = { __typename?: 'Query', categoriesConnection: { __typename?: 'CategoriesConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'CategoriesConnectionEdges', cursor: string, node?: { __typename: 'Categories', id: string, title: string, slug: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
+
+export type SubcategoriesQueryVariables = Exact<{
+  relativePath: Scalars['String']['input'];
+}>;
+
+
+export type SubcategoriesQuery = { __typename?: 'Query', subcategories: { __typename: 'Subcategories', id: string, title: string, slug: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, parentCategory: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } } };
+
+export type SubcategoriesConnectionQueryVariables = Exact<{
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<SubcategoriesFilter>;
+}>;
+
+
+export type SubcategoriesConnectionQuery = { __typename?: 'Query', subcategoriesConnection: { __typename?: 'SubcategoriesConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'SubcategoriesConnectionEdges', cursor: string, node?: { __typename: 'Subcategories', id: string, title: string, slug: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, parentCategory: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } } | null } | null> | null } };
 
 export type ProductsQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
 }>;
 
 
-export type ProductsQuery = { __typename?: 'Query', products: { __typename: 'Products', id: string, name: string, slug: string, description?: string | null, mainImage: string, active?: boolean | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, category: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, subcategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null } };
+export type ProductsQuery = { __typename?: 'Query', products: { __typename: 'Products', id: string, name: string, slug: string, description?: string | null, mainImage: string, active?: boolean | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, category: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, subcategory?: { __typename: 'Subcategories', title: string, slug: string, id: string, parentCategory: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null } };
 
 export type ProductsConnectionQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -507,7 +594,7 @@ export type ProductsConnectionQueryVariables = Exact<{
 }>;
 
 
-export type ProductsConnectionQuery = { __typename?: 'Query', productsConnection: { __typename?: 'ProductsConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'ProductsConnectionEdges', cursor: string, node?: { __typename: 'Products', id: string, name: string, slug: string, description?: string | null, mainImage: string, active?: boolean | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, category: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, subcategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null } | null } | null> | null } };
+export type ProductsConnectionQuery = { __typename?: 'Query', productsConnection: { __typename?: 'ProductsConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'ProductsConnectionEdges', cursor: string, node?: { __typename: 'Products', id: string, name: string, slug: string, description?: string | null, mainImage: string, active?: boolean | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, category: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, subcategory?: { __typename: 'Subcategories', title: string, slug: string, id: string, parentCategory: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null } | null } | null> | null } };
 
 export type FulfilledOrdersQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -533,30 +620,18 @@ export const CategoriesPartsFragmentDoc = gql`
   __typename
   title
   slug
+}
+    `;
+export const SubcategoriesPartsFragmentDoc = gql`
+    fragment SubcategoriesParts on Subcategories {
+  __typename
+  title
+  slug
   parentCategory {
     ... on Categories {
       __typename
       title
       slug
-      parentCategory {
-        ... on Categories {
-          __typename
-          title
-          slug
-        }
-        ... on Document {
-          _sys {
-            filename
-            basename
-            hasReferences
-            breadcrumbs
-            path
-            relativePath
-            extension
-          }
-          id
-        }
-      }
     }
     ... on Document {
       _sys {
@@ -583,25 +658,6 @@ export const ProductsPartsFragmentDoc = gql`
       __typename
       title
       slug
-      parentCategory {
-        ... on Categories {
-          __typename
-          title
-          slug
-        }
-        ... on Document {
-          _sys {
-            filename
-            basename
-            hasReferences
-            breadcrumbs
-            path
-            relativePath
-            extension
-          }
-          id
-        }
-      }
     }
     ... on Document {
       _sys {
@@ -617,7 +673,7 @@ export const ProductsPartsFragmentDoc = gql`
     }
   }
   subcategory {
-    ... on Categories {
+    ... on Subcategories {
       __typename
       title
       slug
@@ -727,6 +783,63 @@ export const CategoriesConnectionDocument = gql`
   }
 }
     ${CategoriesPartsFragmentDoc}`;
+export const SubcategoriesDocument = gql`
+    query subcategories($relativePath: String!) {
+  subcategories(relativePath: $relativePath) {
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+    ...SubcategoriesParts
+  }
+}
+    ${SubcategoriesPartsFragmentDoc}`;
+export const SubcategoriesConnectionDocument = gql`
+    query subcategoriesConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: SubcategoriesFilter) {
+  subcategoriesConnection(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sort: $sort
+    filter: $filter
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+        ...SubcategoriesParts
+      }
+    }
+  }
+}
+    ${SubcategoriesPartsFragmentDoc}`;
 export const ProductsDocument = gql`
     query products($relativePath: String!) {
   products(relativePath: $relativePath) {
@@ -850,6 +963,12 @@ export type Requester<C= {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) 
     categoriesConnection(variables?: CategoriesConnectionQueryVariables, options?: C): Promise<{data: CategoriesConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: CategoriesConnectionQueryVariables, query: string}> {
         return requester<{data: CategoriesConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: CategoriesConnectionQueryVariables, query: string}, CategoriesConnectionQueryVariables>(CategoriesConnectionDocument, variables, options);
       },
+    subcategories(variables: SubcategoriesQueryVariables, options?: C): Promise<{data: SubcategoriesQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: SubcategoriesQueryVariables, query: string}> {
+        return requester<{data: SubcategoriesQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: SubcategoriesQueryVariables, query: string}, SubcategoriesQueryVariables>(SubcategoriesDocument, variables, options);
+      },
+    subcategoriesConnection(variables?: SubcategoriesConnectionQueryVariables, options?: C): Promise<{data: SubcategoriesConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: SubcategoriesConnectionQueryVariables, query: string}> {
+        return requester<{data: SubcategoriesConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: SubcategoriesConnectionQueryVariables, query: string}, SubcategoriesConnectionQueryVariables>(SubcategoriesConnectionDocument, variables, options);
+      },
     products(variables: ProductsQueryVariables, options?: C): Promise<{data: ProductsQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ProductsQueryVariables, query: string}> {
         return requester<{data: ProductsQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ProductsQueryVariables, query: string}, ProductsQueryVariables>(ProductsDocument, variables, options);
       },
@@ -909,7 +1028,7 @@ export const ExperimentalGetTinaClient = () =>
   getSdk(
     generateRequester(
       createClient({
-        url: "http://localhost:4001/graphql",
+        url: "https://content.tinajs.io/1.6/content/mock/github/main",
         queries,
       })
     )

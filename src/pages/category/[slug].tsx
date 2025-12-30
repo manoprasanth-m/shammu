@@ -4,24 +4,20 @@ import Layout from '@/components/Layout';
 import ProductCard from '@/components/ProductCard';
 import {
   getAllCategories,
+  getAllSubcategories,
   getCategoryBySlug,
+  getSubcategoryBySlug,
   getProductsByCategory,
   getSubcategories,
   getParentCategoryOf,
   getParentCategories,
-  Category,
-  Product,
-  slugFromReference
 } from '@/lib/data';
-
-interface CategoryWithSubs extends Category {
-  subcategories: Category[];
-}
+import { Category, Product, CategoryWithSubs, Subcategory } from '@/lib/types';
 
 interface CategoryPageProps {
-  category: Category;
+  category: Category | Subcategory;
   parentCategory: Category | null;
-  subcategories: Category[];
+  subcategories: Subcategory[];
   products: Product[];
   categoryTree: CategoryWithSubs[];
 }
@@ -92,19 +88,42 @@ export default function CategoryPage({ category, parentCategory, subcategories, 
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const categories = getAllCategories();
-  const paths = categories.map((category) => ({
+  const subcategories = getAllSubcategories();
+
+  // Create paths for both categories and subcategories
+  const categoryPaths = categories.map((category) => ({
     params: { slug: category.slug },
   }));
 
+  const subcategoryPaths = subcategories.map((subcategory) => ({
+    params: { slug: subcategory.slug },
+  }));
+
   return {
-    paths,
+    paths: [...categoryPaths, ...subcategoryPaths],
     fallback: 'blocking',
   };
 };
 
 export const getStaticProps: GetStaticProps<CategoryPageProps> = async ({ params }) => {
   const slug = params?.slug as string;
-  const category = getCategoryBySlug(slug);
+
+  // Try to find as a parent category first
+  let category: Category | Subcategory | null = getCategoryBySlug(slug);
+  let parentCategory: Category | null = null;
+  let subcategories: Subcategory[] = [];
+
+  if (category) {
+    // It's a parent category
+    subcategories = getSubcategories(slug);
+  } else {
+    // Try to find as a subcategory
+    category = getSubcategoryBySlug(slug);
+    if (category) {
+      // It's a subcategory, find its parent
+      parentCategory = getParentCategoryOf(category as Subcategory);
+    }
+  }
 
   if (!category) {
     return {
@@ -112,17 +131,11 @@ export const getStaticProps: GetStaticProps<CategoryPageProps> = async ({ params
     };
   }
 
-  // Get parent category if this is a subcategory
-  const parentCategory = getParentCategoryOf(category);
-
-  // Get subcategories if this is a parent category
-  const subcategories = getSubcategories(slug);
-
-  // Get products - include products from subcategories if this is a parent
+  // Get products
   let products = getProductsByCategory(slug);
 
-  // If parent category, also get products from subcategories
-  if (subcategories.length > 0) {
+  // If it's a parent category, also include products from its subcategories
+  if (!parentCategory && subcategories.length > 0) {
     for (const subcat of subcategories) {
       const subcatProducts = getProductsByCategory(subcat.slug);
       products = [...products, ...subcatProducts];
@@ -132,7 +145,7 @@ export const getStaticProps: GetStaticProps<CategoryPageProps> = async ({ params
   }
 
   // Build category tree for ProductCard
-  const parentCategories = getParentCategories();
+  const parentCategories = getAllCategories();
   const categoryTree: CategoryWithSubs[] = parentCategories.map((parent) => ({
     ...parent,
     subcategories: getSubcategories(parent.slug),

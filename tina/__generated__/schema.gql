@@ -56,6 +56,8 @@ type Query {
   document(collection: String, relativePath: String): DocumentNode!
   categories(relativePath: String): Categories!
   categoriesConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: CategoriesFilter): CategoriesConnection!
+  subcategories(relativePath: String): Subcategories!
+  subcategoriesConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: SubcategoriesFilter): SubcategoriesConnection!
   products(relativePath: String): Products!
   productsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: ProductsFilter): ProductsConnection!
   fulfilledOrders(relativePath: String): FulfilledOrders!
@@ -64,6 +66,7 @@ type Query {
 
 input DocumentFilter {
   categories: CategoriesFilter
+  subcategories: SubcategoriesFilter
   products: ProductsFilter
   fulfilledOrders: FulfilledOrdersFilter
 }
@@ -91,14 +94,11 @@ type Collection {
   documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter, folder: String): DocumentConnection!
 }
 
-union DocumentNode = Categories | Products | FulfilledOrders | Folder
-
-union CategoriesParentCategory = Categories
+union DocumentNode = Categories | Subcategories | Products | FulfilledOrders | Folder
 
 type Categories implements Node & Document {
   title: String!
   slug: String!
-  parentCategory: CategoriesParentCategory
   id: ID!
   _sys: SystemInfo!
   _values: JSON!
@@ -111,14 +111,9 @@ input StringFilter {
   in: [String]
 }
 
-input CategoriesParentCategoryFilter {
-  categories: CategoriesFilter
-}
-
 input CategoriesFilter {
   title: StringFilter
   slug: StringFilter
-  parentCategory: CategoriesParentCategoryFilter
 }
 
 type CategoriesConnectionEdges {
@@ -132,9 +127,41 @@ type CategoriesConnection implements Connection {
   edges: [CategoriesConnectionEdges]
 }
 
+union SubcategoriesParentCategory = Categories
+
+type Subcategories implements Node & Document {
+  title: String!
+  slug: String!
+  parentCategory: SubcategoriesParentCategory!
+  id: ID!
+  _sys: SystemInfo!
+  _values: JSON!
+}
+
+input SubcategoriesParentCategoryFilter {
+  categories: CategoriesFilter
+}
+
+input SubcategoriesFilter {
+  title: StringFilter
+  slug: StringFilter
+  parentCategory: SubcategoriesParentCategoryFilter
+}
+
+type SubcategoriesConnectionEdges {
+  cursor: String!
+  node: Subcategories
+}
+
+type SubcategoriesConnection implements Connection {
+  pageInfo: PageInfo!
+  totalCount: Float!
+  edges: [SubcategoriesConnectionEdges]
+}
+
 union ProductsCategory = Categories
 
-union ProductsSubcategory = Categories
+union ProductsSubcategory = Subcategories
 
 type ProductsImages {
   src: String
@@ -159,7 +186,7 @@ input ProductsCategoryFilter {
 }
 
 input ProductsSubcategoryFilter {
-  categories: CategoriesFilter
+  subcategories: SubcategoriesFilter
 }
 
 input ImageFilter {
@@ -232,6 +259,8 @@ type Mutation {
   createFolder(collection: String, relativePath: String!): DocumentNode!
   updateCategories(relativePath: String!, params: CategoriesMutation!): Categories!
   createCategories(relativePath: String!, params: CategoriesMutation!): Categories!
+  updateSubcategories(relativePath: String!, params: SubcategoriesMutation!): Subcategories!
+  createSubcategories(relativePath: String!, params: SubcategoriesMutation!): Subcategories!
   updateProducts(relativePath: String!, params: ProductsMutation!): Products!
   createProducts(relativePath: String!, params: ProductsMutation!): Products!
   updateFulfilledOrders(relativePath: String!, params: FulfilledOrdersMutation!): FulfilledOrders!
@@ -240,6 +269,7 @@ type Mutation {
 
 input DocumentUpdateMutation {
   categories: CategoriesMutation
+  subcategories: SubcategoriesMutation
   products: ProductsMutation
   fulfilledOrders: FulfilledOrdersMutation
   relativePath: String
@@ -247,11 +277,17 @@ input DocumentUpdateMutation {
 
 input DocumentMutation {
   categories: CategoriesMutation
+  subcategories: SubcategoriesMutation
   products: ProductsMutation
   fulfilledOrders: FulfilledOrdersMutation
 }
 
 input CategoriesMutation {
+  title: String
+  slug: String
+}
+
+input SubcategoriesMutation {
   title: String
   slug: String
   parentCategory: String
