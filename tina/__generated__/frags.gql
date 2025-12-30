@@ -2,13 +2,126 @@ fragment CategoriesParts on Categories {
   __typename
   title
   slug
+  parentCategory {
+    ... on Categories {
+      __typename
+      title
+      slug
+      parentCategory {
+        ... on Categories {
+          __typename
+          title
+          slug
+        }
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+      }
+    }
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+  }
 }
 
 fragment ProductsParts on Products {
   __typename
   name
   slug
-  category
+  category {
+    ... on Categories {
+      __typename
+      title
+      slug
+      parentCategory {
+        ... on Categories {
+          __typename
+          title
+          slug
+        }
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+      }
+    }
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+  }
+  subcategory {
+    ... on Categories {
+      __typename
+      title
+      slug
+      parentCategory {
+        ... on Categories {
+          __typename
+          title
+          slug
+        }
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+      }
+    }
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+  }
   description
   mainImage
   images {

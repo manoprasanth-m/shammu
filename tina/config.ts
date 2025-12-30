@@ -17,7 +17,7 @@ export default defineConfig({
     },
   },
   schema: {
-  collections: [
+    collections: [
       {
         name: 'categories',
         label: 'Categories',
@@ -36,6 +36,12 @@ export default defineConfig({
             label: 'Slug',
             required: true,
             description: 'URL-friendly name (lowercase, hyphens instead of spaces)',
+          },
+          {
+            type: 'reference',
+            name: 'parentCategory',
+            label: 'Parent Category (leave empty for top-level)',
+            collections: ['categories'],
           },
         ],
         ui: {
@@ -67,27 +73,17 @@ export default defineConfig({
             description: 'URL-friendly name (lowercase, hyphens instead of spaces)',
           },
           {
-            type: 'string',
+            type: 'reference',
             name: 'category',
             label: 'Category',
             required: true,
-            options: [
-              { value: 'customized-gifts', label: 'Customized Gifts' },
-              { value: 'apparel', label: 'Apparel' },
-              { value: 'bags', label: 'Bags' },
-              { value: 'jewelry', label: 'Jewelry' },
-              { value: 'paintings', label: 'Paintings' },
-              { value: 'art-prints', label: 'Art Prints' },
-              { value: 'wall-decor', label: 'Wall Decor' },
-              { value: 'home-decor', label: 'Home Decor' },
-              { value: 'home-furnishings', label: 'Home Furnishings' },
-              { value: 'kitchen-dining', label: 'Kitchen & Dining' },
-              { value: 'stationery-office', label: 'Stationery & Office' },
-              { value: 'kids-baby', label: 'Kids & Baby' },
-              { value: 'events-parties', label: 'Events & Parties' },
-              { value: 'custom-requests', label: 'Custom Requests' },
-              { value: 'seasonal-decor', label: 'Seasonal Decor' },
-            ],
+            collections: ['categories'],
+          },
+          {
+            type: 'reference',
+            name: 'subcategory',
+            label: 'Subcategory (optional)',
+            collections: ['categories'],
           },
           {
             type: 'string',

@@ -3,29 +3,44 @@ import { GetStaticProps } from 'next';
 import Layout from '@/components/Layout';
 import CategoryChip from '@/components/CategoryChip';
 import ProductCard from '@/components/ProductCard';
-import { getAllCategories, getAllProducts, getAllFulfilledOrders, Category, Product, FulfilledOrder } from '@/lib/data';
+import { getParentCategories, getSubcategories, getAllProducts, getAllFulfilledOrders } from '@/lib/data';
+import { Category, Product, FulfilledOrder, CategoryWithSubs, slugFromReference } from '@/lib/types';
 import { makeWhatsAppLink, getGeneralEnquiryText } from '@/lib/whatsapp';
+import Link from 'next/link';
 
 interface HomeProps {
-  categories: Category[];
+  categoryTree: CategoryWithSubs[];
   products: Product[];
   fulfilledOrders: FulfilledOrder[];
 }
 
-export default function Home({ categories, products, fulfilledOrders }: HomeProps) {
+export default function Home({ categoryTree, products, fulfilledOrders }: HomeProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const PRODUCTS_PER_PAGE = 30;
 
+  // Filter products by selected category (matching either category or subcategory slug)
   const filteredProducts = selectedCategory
-    ? products.filter((p) => p.category === selectedCategory)
+    ? products.filter((p) => {
+      const catSlug = slugFromReference(p.category);
+      const subcatSlug = slugFromReference(p.subcategory);
+      // Check if selected category is a parent category
+      const parentCat = categoryTree.find((c) => c.slug === selectedCategory);
+      if (parentCat) {
+        // If it's a parent, include products in this category OR any of its subcategories
+        const subcatSlugs = parentCat.subcategories.map((s) => s.slug);
+        return catSlug === selectedCategory || subcatSlugs.includes(catSlug || '') || subcatSlugs.includes(subcatSlug || '');
+      }
+      // Otherwise it's a subcategory, match exactly
+      return catSlug === selectedCategory || subcatSlug === selectedCategory;
+    })
     : products;
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE) || 1;
 
   useEffect(() => {
-    // Reset to first page whenever the selected category changes
     setCurrentPage(1);
   }, [selectedCategory]);
 
@@ -35,6 +50,18 @@ export default function Home({ categories, products, fulfilledOrders }: HomeProp
   );
 
   const whatsappLink = makeWhatsAppLink({ text: getGeneralEnquiryText() });
+
+  const toggleCategory = (slug: string) => {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) {
+        next.delete(slug);
+      } else {
+        next.add(slug);
+      }
+      return next;
+    });
+  };
 
   return (
     <Layout>
@@ -57,7 +84,7 @@ export default function Home({ categories, products, fulfilledOrders }: HomeProp
             className="btn-primary inline-flex items-center gap-2 shadow-md hover:shadow-lg"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
             </svg>
             Start Shopping
           </a>
@@ -150,27 +177,77 @@ export default function Home({ categories, products, fulfilledOrders }: HomeProp
               </div>
             </div>
 
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                  selectedCategory === null
+            {/* Category Tree */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === null
                     ? 'bg-accent text-white shadow-sm'
                     : 'bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent'
-                }`}
-              >
-                All
-              </button>
-              {categories.map((category) => (
-                <CategoryChip
-                  key={category.slug}
-                  title={category.title}
-                  slug={category.slug}
-                  isActive={selectedCategory === category.slug}
-                  onClick={() => setSelectedCategory(category.slug)}
-                  asLink={false}
-                />
-              ))}
+                    }`}
+                >
+                  All
+                </button>
+              </div>
+
+              {/* Parent Categories with Expandable Subcategories */}
+              <div className="flex flex-col gap-1 mt-2">
+                {categoryTree.map((parentCat) => (
+                  <div key={parentCat.slug} className="border border-gray-100 rounded-lg bg-white overflow-hidden">
+                    <div className="flex items-center">
+                      <button
+                        onClick={() => {
+                          setSelectedCategory(parentCat.slug);
+                          if (parentCat.subcategories.length > 0) {
+                            toggleCategory(parentCat.slug);
+                          }
+                        }}
+                        className={`flex-1 px-4 py-3 text-left text-sm font-medium transition-all ${selectedCategory === parentCat.slug
+                          ? 'bg-accent/10 text-accent'
+                          : 'text-secondary hover:bg-gray-50'
+                          }`}
+                      >
+                        {parentCat.title}
+                      </button>
+                      {parentCat.subcategories.length > 0 && (
+                        <button
+                          onClick={() => toggleCategory(parentCat.slug)}
+                          className="px-3 py-3 text-gray-400 hover:text-accent transition-colors"
+                          aria-label={expandedCategories.has(parentCat.slug) ? 'Collapse' : 'Expand'}
+                        >
+                          <svg
+                            className={`w-4 h-4 transition-transform ${expandedCategories.has(parentCat.slug) ? 'rotate-180' : ''}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Subcategories */}
+                    {expandedCategories.has(parentCat.slug) && parentCat.subcategories.length > 0 && (
+                      <div className="border-t border-gray-100 bg-gray-50/50">
+                        {parentCat.subcategories.map((subcat) => (
+                          <button
+                            key={subcat.slug}
+                            onClick={() => setSelectedCategory(subcat.slug)}
+                            className={`w-full px-6 py-2 text-left text-sm transition-all ${selectedCategory === subcat.slug
+                              ? 'bg-accent/10 text-accent font-medium'
+                              : 'text-gray-600 hover:bg-gray-100'
+                              }`}
+                          >
+                            ↳ {subcat.title}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -181,7 +258,7 @@ export default function Home({ categories, products, fulfilledOrders }: HomeProp
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {paginatedProducts.map((product) => (
-                <ProductCard key={product.slug} product={product} />
+                <ProductCard key={product.slug} product={product} categoryTree={categoryTree} />
               ))}
             </div>
           )}
@@ -191,11 +268,10 @@ export default function Home({ categories, products, fulfilledOrders }: HomeProp
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                  currentPage === 1
-                    ? 'border-gray-200 text-gray-300 cursor-not-allowed'
-                    : 'border-accent text-accent hover:bg-accent hover:text-white'
-                }`}
+                className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${currentPage === 1
+                  ? 'border-gray-200 text-gray-300 cursor-not-allowed'
+                  : 'border-accent text-accent hover:bg-accent hover:text-white'
+                  }`}
               >
                 Previous
               </button>
@@ -207,11 +283,10 @@ export default function Home({ categories, products, fulfilledOrders }: HomeProp
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`w-9 h-9 rounded-full text-sm font-medium transition-all ${
-                        currentPage === page
-                          ? 'bg-accent text-white'
-                          : 'bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent'
-                      }`}
+                      className={`w-9 h-9 rounded-full text-sm font-medium transition-all ${currentPage === page
+                        ? 'bg-accent text-white'
+                        : 'bg-white border border-gray-200 text-secondary hover:border-accent hover:text-accent'
+                        }`}
                     >
                       {page}
                     </button>
@@ -222,11 +297,10 @@ export default function Home({ categories, products, fulfilledOrders }: HomeProp
               <button
                 onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                  currentPage === totalPages
-                    ? 'border-gray-200 text-gray-300 cursor-not-allowed'
-                    : 'border-accent text-accent hover:bg-accent hover:text-white'
-                }`}
+                className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${currentPage === totalPages
+                  ? 'border-gray-200 text-gray-300 cursor-not-allowed'
+                  : 'border-accent text-accent hover:bg-accent hover:text-white'
+                  }`}
               >
                 Next
               </button>
@@ -239,15 +313,22 @@ export default function Home({ categories, products, fulfilledOrders }: HomeProp
 }
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
-  const categories = getAllCategories();
+  const parentCategories = getParentCategories();
   const products = getAllProducts();
   const fulfilledOrders = getAllFulfilledOrders();
 
+  // Build category tree with subcategories
+  const categoryTree: CategoryWithSubs[] = parentCategories.map((parent) => ({
+    ...parent,
+    subcategories: getSubcategories(parent.slug),
+  }));
+
   return {
     props: {
-      categories,
+      categoryTree,
       products,
       fulfilledOrders,
     },
   };
 };
+

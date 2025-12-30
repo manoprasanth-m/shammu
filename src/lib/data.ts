@@ -1,25 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 
-export interface Category {
-  title: string;
-  slug: string;
-}
+// Re-export types and utility functions from types.ts for backward compatibility
+export type { Category, Product, FulfilledOrder, CategoryWithSubs } from './types';
+export { slugFromReference } from './types';
 
-export interface Product {
-  name: string;
-  slug: string;
-  category: string;
-  description?: string;
-  mainImage: string;
-  images?: string[];
-  active: boolean;
-}
-
-export interface FulfilledOrder {
-  title: string;
-  image: string;
-}
+import type { Category, Product, FulfilledOrder } from './types';
+import { slugFromReference } from './types';
 
 const CATEGORIES_DIR = path.join(process.cwd(), 'content/categories');
 const PRODUCTS_DIR = path.join(process.cwd(), 'content/products');
@@ -49,6 +36,27 @@ export function getAllCategories(): Category[] {
   }
 }
 
+// Get only top-level categories (those without parentCategory)
+export function getParentCategories(): Category[] {
+  const allCategories = getAllCategories();
+  return allCategories.filter((cat) => !cat.parentCategory);
+}
+
+// Get subcategories for a given parent category slug
+export function getSubcategories(parentSlug: string): Category[] {
+  const allCategories = getAllCategories();
+  return allCategories.filter((cat) => {
+    const parentRef = slugFromReference(cat.parentCategory);
+    return parentRef === parentSlug;
+  });
+}
+
+// Get all categories that are subcategories (have a parent)
+export function getAllSubcategories(): Category[] {
+  const allCategories = getAllCategories();
+  return allCategories.filter((cat) => cat.parentCategory);
+}
+
 export function getCategoryBySlug(slug: string): Category | null {
   try {
     const filePath = path.join(CATEGORIES_DIR, `${slug}.json`);
@@ -61,6 +69,30 @@ export function getCategoryBySlug(slug: string): Category | null {
     console.error('Error reading category:', error);
     return null;
   }
+}
+
+// Get the parent category for a given category (if it has one)
+export function getParentCategoryOf(category: Category): Category | null {
+  if (!category.parentCategory) return null;
+  const parentSlug = slugFromReference(category.parentCategory);
+  return parentSlug ? getCategoryBySlug(parentSlug) : null;
+}
+
+// Build a full category path string like "Home Decor / Wall Art"
+export function getCategoryPath(categorySlug: string | null, subcategorySlug: string | null): string {
+  const parts: string[] = [];
+
+  if (categorySlug) {
+    const category = getCategoryBySlug(categorySlug);
+    if (category) parts.push(category.title);
+  }
+
+  if (subcategorySlug) {
+    const subcategory = getCategoryBySlug(subcategorySlug);
+    if (subcategory) parts.push(subcategory.title);
+  }
+
+  return parts.join(' / ');
 }
 
 export function getAllProducts(): Product[] {
@@ -89,9 +121,34 @@ export function getAllProducts(): Product[] {
   }
 }
 
+// Get products by category slug (matches both category and subcategory)
 export function getProductsByCategory(categorySlug: string): Product[] {
   const allProducts = getAllProducts();
-  return allProducts.filter((product) => product.category === categorySlug);
+  return allProducts.filter((product) => {
+    const productCatSlug = slugFromReference(product.category);
+    const productSubcatSlug = slugFromReference(product.subcategory);
+    // Match if the category slug matches product's category OR subcategory
+    return productCatSlug === categorySlug || productSubcatSlug === categorySlug;
+  });
+}
+
+// Get products that belong to a parent category (including all its subcategories)
+export function getProductsByParentCategory(parentSlug: string): Product[] {
+  const allProducts = getAllProducts();
+  const subcategories = getSubcategories(parentSlug);
+  const subcategorySlugs = subcategories.map((s) => s.slug);
+
+  return allProducts.filter((product) => {
+    const productCatSlug = slugFromReference(product.category);
+    const productSubcatSlug = slugFromReference(product.subcategory);
+
+    // Match if product's category is the parent
+    if (productCatSlug === parentSlug) return true;
+    // Or if product's subcategory belongs to this parent
+    if (productSubcatSlug && subcategorySlugs.includes(productSubcatSlug)) return true;
+
+    return false;
+  });
 }
 
 export function getProductBySlug(slug: string): Product | null {
@@ -131,3 +188,4 @@ export function getAllFulfilledOrders(): FulfilledOrder[] {
     return [];
   }
 }
+

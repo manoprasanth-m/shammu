@@ -201,10 +201,13 @@ export type CollectionDocumentsArgs = {
 
 export type DocumentNode = Categories | Products | FulfilledOrders | Folder;
 
+export type CategoriesParentCategory = Categories;
+
 export type Categories = Node & Document & {
   __typename?: 'Categories';
   title: Scalars['String']['output'];
   slug: Scalars['String']['output'];
+  parentCategory?: Maybe<CategoriesParentCategory>;
   id: Scalars['ID']['output'];
   _sys: SystemInfo;
   _values: Scalars['JSON']['output'];
@@ -217,9 +220,14 @@ export type StringFilter = {
   in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
+export type CategoriesParentCategoryFilter = {
+  categories?: InputMaybe<CategoriesFilter>;
+};
+
 export type CategoriesFilter = {
   title?: InputMaybe<StringFilter>;
   slug?: InputMaybe<StringFilter>;
+  parentCategory?: InputMaybe<CategoriesParentCategoryFilter>;
 };
 
 export type CategoriesConnectionEdges = {
@@ -235,6 +243,10 @@ export type CategoriesConnection = Connection & {
   edges?: Maybe<Array<Maybe<CategoriesConnectionEdges>>>;
 };
 
+export type ProductsCategory = Categories;
+
+export type ProductsSubcategory = Categories;
+
 export type ProductsImages = {
   __typename?: 'ProductsImages';
   src?: Maybe<Scalars['String']['output']>;
@@ -244,7 +256,8 @@ export type Products = Node & Document & {
   __typename?: 'Products';
   name: Scalars['String']['output'];
   slug: Scalars['String']['output'];
-  category: Scalars['String']['output'];
+  category: ProductsCategory;
+  subcategory?: Maybe<ProductsSubcategory>;
   description?: Maybe<Scalars['String']['output']>;
   mainImage: Scalars['String']['output'];
   images?: Maybe<Array<Maybe<ProductsImages>>>;
@@ -252,6 +265,14 @@ export type Products = Node & Document & {
   id: Scalars['ID']['output'];
   _sys: SystemInfo;
   _values: Scalars['JSON']['output'];
+};
+
+export type ProductsCategoryFilter = {
+  categories?: InputMaybe<CategoriesFilter>;
+};
+
+export type ProductsSubcategoryFilter = {
+  categories?: InputMaybe<CategoriesFilter>;
 };
 
 export type ImageFilter = {
@@ -273,7 +294,8 @@ export type BooleanFilter = {
 export type ProductsFilter = {
   name?: InputMaybe<StringFilter>;
   slug?: InputMaybe<StringFilter>;
-  category?: InputMaybe<StringFilter>;
+  category?: InputMaybe<ProductsCategoryFilter>;
+  subcategory?: InputMaybe<ProductsSubcategoryFilter>;
   description?: InputMaybe<StringFilter>;
   mainImage?: InputMaybe<ImageFilter>;
   images?: InputMaybe<ProductsImagesFilter>;
@@ -420,6 +442,7 @@ export type DocumentMutation = {
 export type CategoriesMutation = {
   title?: InputMaybe<Scalars['String']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
+  parentCategory?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ProductsImagesMutation = {
@@ -430,6 +453,7 @@ export type ProductsMutation = {
   name?: InputMaybe<Scalars['String']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
   category?: InputMaybe<Scalars['String']['input']>;
+  subcategory?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
   mainImage?: InputMaybe<Scalars['String']['input']>;
   images?: InputMaybe<Array<InputMaybe<ProductsImagesMutation>>>;
@@ -441,9 +465,9 @@ export type FulfilledOrdersMutation = {
   image?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type CategoriesPartsFragment = { __typename: 'Categories', title: string, slug: string };
+export type CategoriesPartsFragment = { __typename: 'Categories', title: string, slug: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null };
 
-export type ProductsPartsFragment = { __typename: 'Products', name: string, slug: string, category: string, description?: string | null, mainImage: string, active?: boolean | null, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null };
+export type ProductsPartsFragment = { __typename: 'Products', name: string, slug: string, description?: string | null, mainImage: string, active?: boolean | null, category: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, subcategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null };
 
 export type FulfilledOrdersPartsFragment = { __typename: 'FulfilledOrders', title: string, image: string };
 
@@ -452,7 +476,7 @@ export type CategoriesQueryVariables = Exact<{
 }>;
 
 
-export type CategoriesQuery = { __typename?: 'Query', categories: { __typename: 'Categories', id: string, title: string, slug: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
+export type CategoriesQuery = { __typename?: 'Query', categories: { __typename: 'Categories', id: string, title: string, slug: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } };
 
 export type CategoriesConnectionQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -464,14 +488,14 @@ export type CategoriesConnectionQueryVariables = Exact<{
 }>;
 
 
-export type CategoriesConnectionQuery = { __typename?: 'Query', categoriesConnection: { __typename?: 'CategoriesConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'CategoriesConnectionEdges', cursor: string, node?: { __typename: 'Categories', id: string, title: string, slug: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
+export type CategoriesConnectionQuery = { __typename?: 'Query', categoriesConnection: { __typename?: 'CategoriesConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'CategoriesConnectionEdges', cursor: string, node?: { __typename: 'Categories', id: string, title: string, slug: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null } | null> | null } };
 
 export type ProductsQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
 }>;
 
 
-export type ProductsQuery = { __typename?: 'Query', products: { __typename: 'Products', id: string, name: string, slug: string, category: string, description?: string | null, mainImage: string, active?: boolean | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null } };
+export type ProductsQuery = { __typename?: 'Query', products: { __typename: 'Products', id: string, name: string, slug: string, description?: string | null, mainImage: string, active?: boolean | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, category: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, subcategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null } };
 
 export type ProductsConnectionQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -483,7 +507,7 @@ export type ProductsConnectionQueryVariables = Exact<{
 }>;
 
 
-export type ProductsConnectionQuery = { __typename?: 'Query', productsConnection: { __typename?: 'ProductsConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'ProductsConnectionEdges', cursor: string, node?: { __typename: 'Products', id: string, name: string, slug: string, category: string, description?: string | null, mainImage: string, active?: boolean | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null } | null } | null> | null } };
+export type ProductsConnectionQuery = { __typename?: 'Query', productsConnection: { __typename?: 'ProductsConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'ProductsConnectionEdges', cursor: string, node?: { __typename: 'Products', id: string, name: string, slug: string, description?: string | null, mainImage: string, active?: boolean | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, category: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } }, subcategory?: { __typename: 'Categories', title: string, slug: string, id: string, parentCategory?: { __typename: 'Categories', title: string, slug: string, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, images?: Array<{ __typename: 'ProductsImages', src?: string | null } | null> | null } | null } | null> | null } };
 
 export type FulfilledOrdersQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -509,6 +533,44 @@ export const CategoriesPartsFragmentDoc = gql`
   __typename
   title
   slug
+  parentCategory {
+    ... on Categories {
+      __typename
+      title
+      slug
+      parentCategory {
+        ... on Categories {
+          __typename
+          title
+          slug
+        }
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+      }
+    }
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+  }
 }
     `;
 export const ProductsPartsFragmentDoc = gql`
@@ -516,7 +578,82 @@ export const ProductsPartsFragmentDoc = gql`
   __typename
   name
   slug
-  category
+  category {
+    ... on Categories {
+      __typename
+      title
+      slug
+      parentCategory {
+        ... on Categories {
+          __typename
+          title
+          slug
+        }
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+      }
+    }
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+  }
+  subcategory {
+    ... on Categories {
+      __typename
+      title
+      slug
+      parentCategory {
+        ... on Categories {
+          __typename
+          title
+          slug
+        }
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+      }
+    }
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+  }
   description
   mainImage
   images {

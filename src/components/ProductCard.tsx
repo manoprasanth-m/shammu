@@ -1,12 +1,47 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Product } from '@/lib/data';
+import { Product, CategoryWithSubs, slugFromReference } from '@/lib/types';
 
 interface ProductCardProps {
   product: Product;
+  categoryTree?: CategoryWithSubs[];
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, categoryTree }: ProductCardProps) {
+  // Build category display string
+  const getCategoryDisplay = () => {
+    const catSlug = slugFromReference(product.category);
+    const subcatSlug = slugFromReference(product.subcategory);
+
+    if (categoryTree) {
+      // Find category names from tree
+      let catName = '';
+      let subcatName = '';
+
+      for (const parent of categoryTree) {
+        if (parent.slug === catSlug) {
+          catName = parent.title;
+        }
+        for (const sub of parent.subcategories) {
+          if (sub.slug === catSlug) {
+            catName = sub.title;
+          }
+          if (sub.slug === subcatSlug) {
+            subcatName = sub.title;
+          }
+        }
+      }
+
+      if (subcatName) {
+        return `${catName} / ${subcatName}`;
+      }
+      return catName || (catSlug || '').replace(/-/g, ' ');
+    }
+
+    // Fallback: just use slug
+    return (catSlug || product.category || '').replace(/-/g, ' ');
+  };
+
   return (
     <Link href={`/product/${product.slug}`} className="group">
       <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow">
@@ -24,10 +59,11 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </h3>
           <p className="text-gray-500 text-sm capitalize">
-            {product.category.replace(/-/g, ' ')}
+            {getCategoryDisplay()}
           </p>
         </div>
       </div>
     </Link>
   );
 }
+

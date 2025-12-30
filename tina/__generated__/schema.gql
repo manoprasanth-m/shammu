@@ -93,9 +93,12 @@ type Collection {
 
 union DocumentNode = Categories | Products | FulfilledOrders | Folder
 
+union CategoriesParentCategory = Categories
+
 type Categories implements Node & Document {
   title: String!
   slug: String!
+  parentCategory: CategoriesParentCategory
   id: ID!
   _sys: SystemInfo!
   _values: JSON!
@@ -108,9 +111,14 @@ input StringFilter {
   in: [String]
 }
 
+input CategoriesParentCategoryFilter {
+  categories: CategoriesFilter
+}
+
 input CategoriesFilter {
   title: StringFilter
   slug: StringFilter
+  parentCategory: CategoriesParentCategoryFilter
 }
 
 type CategoriesConnectionEdges {
@@ -124,6 +132,10 @@ type CategoriesConnection implements Connection {
   edges: [CategoriesConnectionEdges]
 }
 
+union ProductsCategory = Categories
+
+union ProductsSubcategory = Categories
+
 type ProductsImages {
   src: String
 }
@@ -131,7 +143,8 @@ type ProductsImages {
 type Products implements Node & Document {
   name: String!
   slug: String!
-  category: String!
+  category: ProductsCategory!
+  subcategory: ProductsSubcategory
   description: String
   mainImage: String!
   images: [ProductsImages]
@@ -139,6 +152,14 @@ type Products implements Node & Document {
   id: ID!
   _sys: SystemInfo!
   _values: JSON!
+}
+
+input ProductsCategoryFilter {
+  categories: CategoriesFilter
+}
+
+input ProductsSubcategoryFilter {
+  categories: CategoriesFilter
 }
 
 input ImageFilter {
@@ -160,7 +181,8 @@ input BooleanFilter {
 input ProductsFilter {
   name: StringFilter
   slug: StringFilter
-  category: StringFilter
+  category: ProductsCategoryFilter
+  subcategory: ProductsSubcategoryFilter
   description: StringFilter
   mainImage: ImageFilter
   images: ProductsImagesFilter
@@ -232,6 +254,7 @@ input DocumentMutation {
 input CategoriesMutation {
   title: String
   slug: String
+  parentCategory: String
 }
 
 input ProductsImagesMutation {
@@ -242,6 +265,7 @@ input ProductsMutation {
   name: String
   slug: String
   category: String
+  subcategory: String
   description: String
   mainImage: String
   images: [ProductsImagesMutation]
